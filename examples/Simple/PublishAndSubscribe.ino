@@ -1,6 +1,5 @@
 #include <Ardunio.h>
 #include <MQTTRemote.h>
-#include <WiFiHelper.h>
 
 const char mqtt_client_id[] = "my-client";
 const char mqtt_host[] = "192.168.1.1";
