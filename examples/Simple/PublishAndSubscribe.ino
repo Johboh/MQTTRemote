@@ -1,6 +1,15 @@
 #include <Ardunio.h>
 #include <MQTTRemote.h>
+#ifdef ESP32
+#include <WiFi.h>
+#elif ESP8266
+#include <ESP8266WiFi.h>
+#else
+#error "Unsupported hardware. Sorry!"
+#endif
 
+const char wifi_ssid[] = "my-wifi-ssid";
+const char wifi_password[] = "my-wifi-password";
 const char mqtt_client_id[] = "my-client";
 const char mqtt_host[] = "192.168.1.1";
 const char mqtt_username[] = "my-username";
@@ -10,7 +19,20 @@ MQTTRemote _mqtt_remote(mqtt_client_id, mqtt_host, 1883, mqtt_username, mqtt_pas
 bool _was_connected = false;
 unsigned long _last_publish_ms = 0;
 
-void setup() { Serial.begin(115200); }
+void setup() {
+  Serial.begin(115200);
+
+  // Setup WiFI
+  WiFi.begin(wifi_ssid, wifi_password);
+  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    Serial.println("Connection Failed! Rebooting...");
+    delay(5000);
+    ESP.restart();
+  }
+  Serial.println("have wifi");
+  Serial.print("IP number: ");
+  Serial.println(WiFi.localIP());
+}
 
 void loop() {
   _mqtt_remote.handle();
