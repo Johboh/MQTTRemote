@@ -1,4 +1,4 @@
-#include <Ardunio.h>
+#include <Arduino.h>
 #include <MQTTRemote.h>
 #ifdef ESP32
 #include <WiFi.h>
@@ -16,6 +16,7 @@ const char mqtt_username[] = "my-username";
 const char mqtt_password[] = "my-password";
 
 MQTTRemote _mqtt_remote(mqtt_client_id, mqtt_host, 1883, mqtt_username, mqtt_password);
+
 bool _was_connected = false;
 unsigned long _last_publish_ms = 0;
 
@@ -37,21 +38,21 @@ void setup() {
 void loop() {
   _mqtt_remote.handle();
 
-  // Subscribe to the topic "interesting/topic" on new connection.
+  // Subscribe to the topic "my-client/interesting/topic" on new connection.
   auto connected = _mqtt_remote.connected();
   if (!_was_connected && connected) {
-    _mqtt_remote.subscribe("interesting/topic", [](const char *topic, const char *message) {
-      Serial.println("Got message [" + message + "] on topic: " + topic);
+    _mqtt_remote.subscribe(_mqtt_remote.clientId() + "/interesting/topic", [](const char *topic, const char *message) {
+      Serial.println("Got message [" + String(message) + "] on topic: " + String(topic));
     });
   } else if (_was_connected && !connected) {
-    _mqtt_remote.unsubscribe();
+    _mqtt_remote.unsubscribe(_mqtt_remote.clientId() + "/interesting/topic");
   }
   _was_connected = connected;
 
-  // Publish a message every 2 second.
+  // Publish a message every 5 seconds.
   auto now = millis();
-  if (_last_publish_ms - now > 2000) {
-    _mqtt_remote.publishVerbose(_mqtt_remote.clientId() + "/my_topic", "my message, hello!");
+  if (now - _last_publish_ms > 5000) {
+    _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/my_topic", "my message, hello!");
     _last_publish_ms = now;
   }
 }
