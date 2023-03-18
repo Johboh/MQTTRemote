@@ -1,4 +1,6 @@
 # MQTTRemote
+[![GitHub release](https://img.shields.io/github/release/Johboh/MQTTRemote.svg)](https://github.com/Johboh/MQTTRemote/releases)
+
 Arduino MQTT wrapper for setting up an MQTT connection.
 
 The wrapper was created to reduce boilerplate of common MQTT setup code that I was repeated in various projects.
