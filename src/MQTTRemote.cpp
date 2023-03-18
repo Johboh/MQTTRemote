@@ -3,10 +3,11 @@
 #define RETRY_CONNECT_WAIT_MS 1000
 
 MQTTRemote::MQTTRemote(String client_id, String host, int port, String username, String password,
-                       uint16_t max_message_size, bool receive_verbose)
+                       uint16_t max_message_size, uint32_t keep_alive, bool receive_verbose)
     : _client_id(client_id), _host(host), _username(username), _password(password), _receive_verbose(receive_verbose),
       _mqtt_client(max_message_size) {
   _mqtt_client.begin(_host.c_str(), port, _wifi_client);
+  _mqtt_client.setKeepAlive(keep_alive);
   std::function<void(MQTTClient * client, char topic[], char bytes[], int length)> callback =
       std::bind(&MQTTRemote::onMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
                 std::placeholders::_4);
