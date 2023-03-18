@@ -1,5 +1,5 @@
 # MQTTRemote
-MQTT wrapper for setting up an MQTT connection.
+Arduino MQTT wrapper for setting up an MQTT connection.
 
 The wrapper was created to reduce boilerplate of common MQTT setup code that I was repeated in various projects.
 
