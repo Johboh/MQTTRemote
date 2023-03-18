@@ -14,8 +14,6 @@
 #error "Unsupported hardware. Sorry!"
 #endif
 
-#define KEEP_ALIVE_S 10
-
 /**
  * @brief MQTT wrapper for setting up MQTT connection (and will) and provide API for sending and subscribing to
  * messages.
@@ -37,13 +35,14 @@ public:
    * @param port MQTT port number.
    * @param username MQTT username.
    * @param password MQTT password.
-   * @param max_message_size the max message size one can send. The larger to more memory/RAM is needed.
-   * @param keep_alive keep alive interval in seconds.
+   * @param max_message_size the max message size one can send. The larger to more memory/RAM is needed. Default: 2048
+   * bytes
+   * @param keep_alive keep alive interval in seconds. Default: 10 seconds
    * @param receive_verbose if true, will print on Serial on message received. Publish verbosity is controlled by the
    * which publish method that is used. Connection information on setup will always be printed out.
    */
   MQTTRemote(String client_id, String host, int port, String username, String password,
-             uint16_t max_message_size = 2048, uint32_t keep_alive = KEEP_ALIVE_S, bool receive_verbose = true);
+             uint16_t max_message_size = 2048, uint32_t keep_alive = 10, bool receive_verbose = true);
 
   /**
    * Call from Arduino loop() function in main.
