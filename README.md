@@ -1,4 +1,5 @@
 # MQTTRemote
+[![Test](https://github.com/Johboh/MQTTRemote/actions/workflows/test.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote/actions/workflows/test.yaml)
 [![GitHub release](https://img.shields.io/github/release/Johboh/MQTTRemote.svg)](https://github.com/Johboh/MQTTRemote/releases)
 
 Arduino MQTT wrapper for setting up an MQTT connection.
