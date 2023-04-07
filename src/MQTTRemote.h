@@ -73,11 +73,16 @@ public:
   /**
    * @brief Subscribe to a topic. The callback will be invoked on every new message.
    * There can only be one callback per topic. If trying to subscribe to an already subscribe topic, it will be ignored.
-   * Don't do have operations in the callback or delays as this will block the MQTT callback.
-   * Subscribe can only be called once there is a connection!
+   * Don't do heavy operations in the callback or delays as this will block the MQTT callback.
+   *
+   * Can be called before being connected. All subscriptions will be (re-)subscribed to once a connection is
+   * (re-)established.
    *
    * @param message_callback a message callback with the topic and the message. The topic is repeated for convinience,
    * but it will always be for the subscribed topic.
+   * @return true if an subcription was successul. Will return false if there is no active MQTT connection. In this
+   * case, the subscription will be performed once connected. Will retun false if this subscription is already
+   * subscribed to.
    */
   bool subscribe(String topic, SubscriptionCallback message_callback) override;
 

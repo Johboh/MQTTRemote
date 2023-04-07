@@ -1,6 +1,6 @@
 #include "MQTTRemote.h"
 
-#define RETRY_CONNECT_WAIT_MS 1000
+#define RETRY_CONNECT_WAIT_MS 3000
 
 MQTTRemote::MQTTRemote(String client_id, String host, int port, String username, String password,
                        uint16_t max_message_size, uint32_t keep_alive, bool receive_verbose)
@@ -18,8 +18,7 @@ void MQTTRemote::handle() {
   auto now = millis();
   auto connected = _mqtt_client.connected();
 
-  if (!connected && now - _last_connection_attempt_timestamp_ms > RETRY_CONNECT_WAIT_MS) {
-    _subscriptions.clear();
+  if (!connected && (now - _last_connection_attempt_timestamp_ms > RETRY_CONNECT_WAIT_MS)) {
     Serial.print("MQTTRemote: Client not connected. Trying to connect... ");
     setupWill();
     auto r = _mqtt_client.connect(_client_id.c_str(), _username.c_str(), _password.c_str());
@@ -28,6 +27,11 @@ void MQTTRemote::handle() {
 
       // And publish that we are now online.
       publishMessageVerbose(_client_id + "/status", "online", true);
+
+      // Subscribe to all topics.
+      for (const auto &subscription : _subscriptions) {
+        _mqtt_client.subscribe(subscription.first);
+      }
     } else {
       Serial.println("failed :(, rc=" + String(_mqtt_client.lastError()));
     }
@@ -58,15 +62,17 @@ bool MQTTRemote::publishMessageVerbose(String topic, String message, bool retain
 
 bool MQTTRemote::subscribe(String topic, SubscriptionCallback message_callback) {
   if (_subscriptions.count(topic) > 0) {
-    Serial.println("MQTTRemote: Err: Topic " + topic + " is already subscribed to.");
-    return false;
-  }
-  if (!connected()) {
-    Serial.println("MQTTRemote: Err: Can only subscribe when connected.");
+    Serial.println("MQTTRemote: Warning: Topic " + topic + " is already subscribed to.");
     return false;
   }
 
   _subscriptions.emplace(topic, message_callback);
+
+  if (!connected()) {
+    Serial.println("MQTTRemote: Not connected. Will subscribe once connected.");
+    return false;
+  }
+
   return _mqtt_client.subscribe(topic);
 }
 
