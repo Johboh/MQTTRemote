@@ -2,10 +2,11 @@
 #define __MQTT_REMOTE_H__
 
 #include "IMQTTRemote.h"
-#include <Arduino.h>
+
 #include <MQTT.h>
 #include <functional>
 #include <map>
+#include <string>
 #ifdef ESP32
 #include <WiFi.h>
 #elif ESP8266
@@ -41,7 +42,7 @@ public:
    * @param receive_verbose if true, will print on Serial on message received. Publish verbosity is controlled by the
    * which publish method that is used. Connection information on setup will always be printed out.
    */
-  MQTTRemote(String client_id, String host, int port, String username, String password,
+  MQTTRemote(std::string client_id, std::string host, int port, std::string username, std::string password,
              uint16_t max_message_size = 2048, uint32_t keep_alive = 10, bool receive_verbose = true);
 
   /**
@@ -58,12 +59,12 @@ public:
    * @param retain True to set this message as retained.
    * @returns true on success, or false on failure.
    */
-  bool publishMessage(String topic, String message, bool retain = false) override;
+  bool publishMessage(std::string topic, std::string message, bool retain = false) override;
 
   /**
    * Same as publishMessage(), but will print the message and topic and the result on serial.
    */
-  bool publishMessageVerbose(String topic, String message, bool retain = false) override;
+  bool publishMessageVerbose(std::string topic, std::string message, bool retain = false) override;
 
   /**
    * @brief returns if there is a connection to the MQTT server.
@@ -84,33 +85,33 @@ public:
    * case, the subscription will be performed once connected. Will retun false if this subscription is already
    * subscribed to.
    */
-  bool subscribe(String topic, SubscriptionCallback message_callback) override;
+  bool subscribe(std::string topic, SubscriptionCallback message_callback) override;
 
   /**
    * @brief Unsubscribe a topic.
    */
-  bool unsubscribe(String topic) override;
+  bool unsubscribe(std::string topic) override;
 
   /**
    * @brief The client ID for this device. This is used for the last will / status
    * topic.Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
    * has to be [a-zA-Z0-9_] only.
    */
-  String &clientId() override { return _client_id; }
+  std::string &clientId() override { return _client_id; }
 
 private:
   void onMessage(MQTTClient *client, char topic_cstr[], char message_cstr[], int message_size);
   void setupWill();
 
 private:
-  String _client_id;
-  String _host;
-  String _username;
-  String _password;
+  std::string _client_id;
+  std::string _host;
+  std::string _username;
+  std::string _password;
   bool _receive_verbose;
   WiFiClient _wifi_client;
   MQTTClient _mqtt_client;
-  std::map<String, SubscriptionCallback> _subscriptions;
+  std::map<std::string, SubscriptionCallback> _subscriptions;
   unsigned long _last_connection_attempt_timestamp_ms = 0;
 };
 

@@ -1,7 +1,9 @@
 #ifndef __I_MQTT_REMOTE_H__
 #define __I_MQTT_REMOTE_H__
 
-#include <Arduino.h>
+#include <cstdint>
+#include <functional>
+#include <string>
 
 /**
  * @brief Inteface to separate the concerns between the actual MQTT implementation that has a lifecycle, connection
@@ -18,12 +20,12 @@ public:
    * @param retain True to set this message as retained.
    * @returns true on success, or false on failure.
    */
-  virtual bool publishMessage(String topic, String message, bool retain = false) = 0;
+  virtual bool publishMessage(std::string topic, std::string message, bool retain = false) = 0;
 
   /**
    * Same as publishMessage(), but will print the message and topic and the result on Serial.
    */
-  virtual bool publishMessageVerbose(String topic, String message, bool retain = false) = 0;
+  virtual bool publishMessageVerbose(std::string topic, std::string message, bool retain = false) = 0;
 
   /**
    * @brief Subscribe to a topic. The callback will be invoked on every new message.
@@ -33,12 +35,12 @@ public:
    * @param message_callback a message callback with the topic and the message. The topic is repeated for convinience,
    * but it will always be for the subscribed topic.
    */
-  virtual bool subscribe(String topic, std::function<void(const char *, const char *)> message_callback) = 0;
+  virtual bool subscribe(std::string topic, std::function<void(const char *, const char *)> message_callback) = 0;
 
   /**
    * @brief Unsubscribe a topic.
    */
-  virtual bool unsubscribe(String topic) = 0;
+  virtual bool unsubscribe(std::string topic) = 0;
 
   /**
    * @brief returns if there is a connection to the MQTT server.
@@ -50,7 +52,7 @@ public:
    * topic.Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
    * has to be [a-zA-Z0-9_] only.
    */
-  virtual String &clientId() = 0;
+  virtual std::string &clientId() = 0;
 };
 
 #endif // __I_MQTT_REMOTE_H__

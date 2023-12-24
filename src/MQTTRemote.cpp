@@ -2,7 +2,7 @@
 
 #define RETRY_CONNECT_WAIT_MS 3000
 
-MQTTRemote::MQTTRemote(String client_id, String host, int port, String username, String password,
+MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::string username, std::string password,
                        uint16_t max_message_size, uint32_t keep_alive, bool receive_verbose)
     : _client_id(client_id), _host(host), _username(username), _password(password), _receive_verbose(receive_verbose),
       _mqtt_client(max_message_size) {
@@ -30,10 +30,10 @@ void MQTTRemote::handle() {
 
       // Subscribe to all topics.
       for (const auto &subscription : _subscriptions) {
-        _mqtt_client.subscribe(subscription.first);
+        _mqtt_client.subscribe(subscription.first.c_str());
       }
     } else {
-      Serial.println("failed :(, rc=" + String(_mqtt_client.lastError()));
+      Serial.println(("failed :(, rc=" + std::to_string(_mqtt_client.lastError())).c_str());
     }
     _last_connection_attempt_timestamp_ms = now;
   } else if (connected) {
@@ -41,28 +41,28 @@ void MQTTRemote::handle() {
   }
 }
 
-bool MQTTRemote::publishMessage(String topic, String message, bool retain) {
+bool MQTTRemote::publishMessage(std::string topic, std::string message, bool retain) {
   if (!connected()) {
-    Serial.println("MQTTRemote: Wanted to publish to topic " + topic + ", but no connection to server.");
+    Serial.println(("MQTTRemote: Wanted to publish to topic " + topic + ", but no connection to server.").c_str());
     return false;
   }
-  return _mqtt_client.publish(topic, message, retain, 0);
+  return _mqtt_client.publish(topic.c_str(), message.c_str(), retain, 0);
 }
 
-bool MQTTRemote::publishMessageVerbose(String topic, String message, bool retain) {
+bool MQTTRemote::publishMessageVerbose(std::string topic, std::string message, bool retain) {
   if (!connected()) {
-    Serial.println("MQTTRemote: Wanted to publish to topic " + topic + ", but no connection to server.");
+    Serial.println(("MQTTRemote: Wanted to publish to topic " + topic + ", but no connection to server.").c_str());
     return false;
   }
-  Serial.print("MQTTRemote: About to publish message '" + message + "' on topic '" + topic + "'...: ");
+  Serial.print(("MQTTRemote: About to publish message '" + message + "' on topic '" + topic + "'...: ").c_str());
   bool r = publishMessage(topic, message, retain);
-  Serial.println(String(r));
+  Serial.println(std::to_string(r).c_str());
   return r;
 }
 
-bool MQTTRemote::subscribe(String topic, SubscriptionCallback message_callback) {
+bool MQTTRemote::subscribe(std::string topic, SubscriptionCallback message_callback) {
   if (_subscriptions.count(topic) > 0) {
-    Serial.println("MQTTRemote: Warning: Topic " + topic + " is already subscribed to.");
+    Serial.println(("MQTTRemote: Warning: Topic " + topic + " is already subscribed to.").c_str());
     return false;
   }
 
@@ -73,18 +73,18 @@ bool MQTTRemote::subscribe(String topic, SubscriptionCallback message_callback) 
     return false;
   }
 
-  return _mqtt_client.subscribe(topic);
+  return _mqtt_client.subscribe(topic.c_str());
 }
 
-bool MQTTRemote::unsubscribe(String topic) {
+bool MQTTRemote::unsubscribe(std::string topic) {
   _subscriptions.erase(topic);
-  return _mqtt_client.unsubscribe(topic);
+  return _mqtt_client.unsubscribe(topic.c_str());
 }
 
 void MQTTRemote::onMessage(MQTTClient *client, char topic_cstr[], char message_cstr[], int message_size) {
-  String topic = String(topic_cstr);
+  std::string topic = std::string(topic_cstr);
   if (_receive_verbose) {
-    Serial.print("Received message with topic " + topic);
+    Serial.print(("Received message with topic " + topic).c_str());
   }
   if (auto subscription = _subscriptions.find(topic); subscription != _subscriptions.end()) {
     if (_receive_verbose) {
@@ -97,8 +97,8 @@ void MQTTRemote::onMessage(MQTTClient *client, char topic_cstr[], char message_c
     }
   }
   if (_receive_verbose) {
-    Serial.println("and size: " + String(message_size));
+    Serial.println(("and size: " + std::to_string(message_size)).c_str());
   }
 }
 
-void MQTTRemote::setupWill() { _mqtt_client.setWill(String(_client_id + "/status").c_str(), "offline", true, 0); }
+void MQTTRemote::setupWill() { _mqtt_client.setWill(std::string(_client_id + "/status").c_str(), "offline", true, 0); }

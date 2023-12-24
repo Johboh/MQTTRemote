@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <MQTTRemote.h>
+#include <string>
 #ifdef ESP32
 #include <WiFi.h>
 #elif ESP8266
