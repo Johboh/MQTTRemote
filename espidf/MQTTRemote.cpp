@@ -21,8 +21,11 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
 
     // Subscribe to all topics.
     for (const auto &subscription : _this->_subscriptions) {
-      //_mqtt_client.subscribe(subscription.first.c_str());
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
       esp_mqtt_client_subscribe_single(client, subscription.first.c_str(), 0);
+#else
+      esp_mqtt_client_subscribe(client, subscription.first.c_str(), 0);
+#endif
     }
     break;
 
@@ -68,9 +71,11 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
     ESP_LOGV(MQTTRemoteLog::TAG, "MQTT_EVENT_DELETED");
     break;
 
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
   case MQTT_USER_EVENT:
     ESP_LOGV(MQTTRemoteLog::TAG, "MQTT_USER_EVENT");
     break;
+#endif
 
   default:
     break;
@@ -99,13 +104,32 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.session.keepalive = keep_alive;
   mqtt_cfg.session.disable_keepalive = false;
 
-  _last_will_topic = _client_id + "/status";
   mqtt_cfg.session.last_will.topic = _last_will_topic.c_str();
   mqtt_cfg.session.last_will.msg = LAST_WILL_MSG;
   mqtt_cfg.session.last_will.qos = 0;
   mqtt_cfg.session.last_will.retain = 0;
 #else
+  mqtt_cfg.host = host.c_str();
+  mqtt_cfg.transport = MQTT_TRANSPORT_OVER_TCP; // TODO: Support TLS
+  mqtt_cfg.port = port;
 
+  mqtt_cfg.buffer_size = max_message_size;
+
+  mqtt_cfg.username = username.c_str();
+  mqtt_cfg.client_id = client_id.c_str();
+  mqtt_cfg.password = password.c_str();
+
+  mqtt_cfg.reconnect_timeout_ms = RETRY_CONNECT_WAIT_MS;
+  mqtt_cfg.disable_auto_reconnect = false;
+
+  mqtt_cfg.keepalive = keep_alive;
+  mqtt_cfg.disable_keepalive = false;
+
+  mqtt_cfg.lwt_topic = _last_will_topic.c_str();
+  mqtt_cfg.lwt_msg = LAST_WILL_MSG;
+  mqtt_cfg.lwt_msg_len = sizeof(LAST_WILL_MSG) - 1;
+  mqtt_cfg.lwt_qos = 0;
+  mqtt_cfg.lwt_retain = 0;
 #endif
 
   _mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
@@ -149,7 +173,11 @@ bool MQTTRemote::subscribe(std::string topic, IMQTTRemote::SubscriptionCallback 
     return false;
   }
 
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
   return esp_mqtt_client_subscribe_single(_mqtt_client, topic.c_str(), 0) >= 0;
+#else
+  return esp_mqtt_client_subscribe(_mqtt_client, topic.c_str(), 0) >= 0;
+#endif
 }
 
 bool MQTTRemote::unsubscribe(std::string topic) {
