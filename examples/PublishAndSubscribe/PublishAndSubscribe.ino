@@ -42,8 +42,8 @@ void loop() {
   // Subscribe to the topic "my-client/interesting/topic" on new connection.
   auto connected = _mqtt_remote.connected();
   if (!_was_connected && connected) {
-    _mqtt_remote.subscribe(_mqtt_remote.clientId() + "/interesting/topic", [](const char *topic, const char *message) {
-      Serial.println("Got message [" + String(message) + "] on topic: " + String(topic));
+    _mqtt_remote.subscribe(_mqtt_remote.clientId() + "/interesting/topic", [](std::string topic, std::string message) {
+      Serial.println(("Got message [" + message + "] on topic: " + topic).c_str());
     });
   } else if (_was_connected && !connected) {
     _mqtt_remote.unsubscribe(_mqtt_remote.clientId() + "/interesting/topic");

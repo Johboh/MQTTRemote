@@ -21,10 +21,6 @@
  */
 class MQTTRemote : public IMQTTRemote {
 public:
-  // First parameter is topic, second one is the message.
-  typedef std::function<void(const char *, const char *)> SubscriptionCallback;
-
-public:
   /**
    * @brief Construct a new Remote object
    *
@@ -85,7 +81,7 @@ public:
    * case, the subscription will be performed once connected. Will retun false if this subscription is already
    * subscribed to.
    */
-  bool subscribe(std::string topic, SubscriptionCallback message_callback) override;
+  bool subscribe(std::string topic, IMQTTRemote::SubscriptionCallback message_callback) override;
 
   /**
    * @brief Unsubscribe a topic.

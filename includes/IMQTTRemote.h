@@ -11,6 +11,9 @@
  */
 class IMQTTRemote {
 public:
+  // First parameter is topic, second one is the message.
+  typedef std::function<void(std::string, std::string)> SubscriptionCallback;
+
   /**
    * @brief Publish a message.
    *
@@ -23,7 +26,7 @@ public:
   virtual bool publishMessage(std::string topic, std::string message, bool retain = false) = 0;
 
   /**
-   * Same as publishMessage(), but will print the message and topic and the result on Serial.
+   * Same as publishMessage(), but will print the message and topic and the result in console.
    */
   virtual bool publishMessageVerbose(std::string topic, std::string message, bool retain = false) = 0;
 
@@ -31,11 +34,12 @@ public:
    * @brief Subscribe to a topic. The callback will be invoked on every new message.
    * There can only be one callback per topic. If trying to subscribe to an already subscribe topic, it will be ignored.
    * Don't do have operations in the callback or delays as this will block the MQTT callback.
+   * If not connected, will subscribe to this topic once connected.
    *
    * @param message_callback a message callback with the topic and the message. The topic is repeated for convinience,
    * but it will always be for the subscribed topic.
    */
-  virtual bool subscribe(std::string topic, std::function<void(const char *, const char *)> message_callback) = 0;
+  virtual bool subscribe(std::string topic, SubscriptionCallback message_callback) = 0;
 
   /**
    * @brief Unsubscribe a topic.

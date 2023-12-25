@@ -60,7 +60,7 @@ bool MQTTRemote::publishMessageVerbose(std::string topic, std::string message, b
   return r;
 }
 
-bool MQTTRemote::subscribe(std::string topic, SubscriptionCallback message_callback) {
+bool MQTTRemote::subscribe(std::string topic, IMQTTRemote::SubscriptionCallback message_callback) {
   if (_subscriptions.count(topic) > 0) {
     Serial.println(("MQTTRemote: Warning: Topic " + topic + " is already subscribed to.").c_str());
     return false;
