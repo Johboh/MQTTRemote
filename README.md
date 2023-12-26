@@ -3,7 +3,7 @@
 [![Test](https://github.com/Johboh/MQTTRemote/actions/workflows/esp_upload_component.yaml/badge.svg)](https://components.espressif.com/components/johboh/mqttremote)
 [![GitHub release](https://img.shields.io/github/release/Johboh/MQTTRemote.svg)](https://github.com/Johboh/MQTTRemote/releases)
 
-Arduino MQTT wrapper for setting up an MQTT connection.
+Arduino (using Arduino IDE or Platform I/O) and ESP-IDF (using Espressif IoT Development Framework or Platform I/O) compatible library MQTT wrapper for setting up an MQTT connection.
 
 The wrapper was created to reduce boilerplate of common MQTT setup code that I was repeated in various projects.
 
@@ -25,7 +25,7 @@ bool publishMessageVerbose("topic", "message"); // Prints to Serial.
 Subscribing/unsubscribing to a topic:
 ```C++
 // First parameter is topic, second one is the message.
-typedef std::function<void(const char *, const char *)> SubscriptionCallback;
+typedef std::function<void(std::string *, std::string *)> SubscriptionCallback;
 
 bool subscribe(String topic, SubscriptionCallback message_callback);
 bool unsubscribe(String topic);
@@ -34,6 +34,20 @@ bool unsubscribe(String topic);
 Call from main `loop()` to run:
 ```C++
 void handle();
+```
+
+### Installation
+#### Platform I/O (Arduino or ESP-IDF):
+Add the following to `libs_deps`:
+```
+   Johboh/MQTTRemote
+```
+#### Espressif IoT Development Framework:
+In your existing `idf_component.yml` or in a new `idf_component.yml` next to your main component:
+```
+dependencies:
+  johboh/MQTTRemote:
+    version: ">=4.0.0"
 ```
 
 ### Examples
@@ -46,4 +60,4 @@ See Example for [publishing and subscribing](examples/PublishAndSubscribe/Publis
 Newer version most probably work too, but they have not been verified.
 
 ### Dependencies
-- https://github.com/256dpi/arduino-mqtt @^2.5.1
+- For Arduino: https://github.com/256dpi/arduino-mqtt @^2.5.1

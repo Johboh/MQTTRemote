@@ -15,6 +15,13 @@
     },
     "frameworks": "arduino",
     "platforms": ["espressif8266", "espressif32"],
+    "examples": [
+      {
+          "name": "PublishAndSubscribe",
+          "base": "examples/PublishAndSubscribe",
+          "files": ["PublishAndSubscribe.ino"]
+      }
+    ],
     "build": {
       "includeDir": "includes",
       "srcDir":"arduino"
