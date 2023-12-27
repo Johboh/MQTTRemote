@@ -27,7 +27,7 @@ dependencies:
 ```
 
 ### Examples
-- [Arduino framework](examples/arduino/PublishAndSubscribe.ino).
+- [Arduino framework](examples/arduino/PublishAndSubscribe.ino)
 - [ESP-IDF framework](examples/espidf/main/main.cpp)
 
 ### Functionallity verified on the following platforms and frameworks
