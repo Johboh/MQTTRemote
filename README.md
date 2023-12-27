@@ -1,5 +1,5 @@
 # MQTTRemote
-[![Platform I/O CI](https://github.com/Johboh/MQTTRemote/actions/workflows/platformio.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote/actions/workflows/platformio.yaml)
+[![Platform I/O CI](https://github.com/Johboh/MQTTRemote/actions/workflows/platformio.yaml/badge.svg)](https://registry.platformio.org/libraries/johboh/MQTTRemote)
 [![ESP-IDF v5 CI](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf5.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf5.yaml)
 [![ESP-IDF v4 CI](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf4.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf4.yaml)
 [![ESP-IDF Component Upload](https://github.com/Johboh/MQTTRemote/actions/workflows/esp_upload_component.yaml/badge.svg)](https://components.espressif.com/components/johboh/connectionhelper)
