@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        example: [examples/PublishAndSubscribe/PublishAndSubscribe.ino]
+        example: [examples/arduino/PublishAndSubscribe.ino]
 
     steps:
       - uses: actions/checkout@v3
