@@ -1,7 +1,6 @@
 # MQTTRemote
 [![Platform I/O CI](https://github.com/Johboh/MQTTRemote/actions/workflows/platformio.yaml/badge.svg)](https://registry.platformio.org/libraries/johboh/MQTTRemote)
-[![ESP-IDF CI](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf.yaml)
-[![ESP-IDF Component Upload](https://github.com/Johboh/MQTTRemote/actions/workflows/esp_upload_component.yaml/badge.svg)](https://components.espressif.com/components/johboh/mqttremote)
+[![ESP-IDF CI](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf.yaml/badge.svg)](https://components.espressif.com/components/johboh/mqttremote)
 [![GitHub release](https://img.shields.io/github/release/Johboh/MQTTRemote.svg)](https://github.com/Johboh/MQTTRemote/releases)
 
 Arduino (using Arduino IDE or Platform I/O) and ESP-IDF (using Espressif IoT Development Framework or Platform I/O) compatible library MQTT wrapper for setting up an MQTT connection.
