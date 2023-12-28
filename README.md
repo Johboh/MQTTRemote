@@ -1,7 +1,6 @@
 # MQTTRemote
 [![Platform I/O CI](https://github.com/Johboh/MQTTRemote/actions/workflows/platformio.yaml/badge.svg)](https://registry.platformio.org/libraries/johboh/MQTTRemote)
-[![ESP-IDF v5 CI](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf5.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf5.yaml)
-[![ESP-IDF v4 CI](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf4.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf4.yaml)
+[![ESP-IDF CI](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf.yaml)
 [![ESP-IDF Component Upload](https://github.com/Johboh/MQTTRemote/actions/workflows/esp_upload_component.yaml/badge.svg)](https://components.espressif.com/components/johboh/mqttremote)
 [![GitHub release](https://img.shields.io/github/release/Johboh/MQTTRemote.svg)](https://github.com/Johboh/MQTTRemote/releases)
 
@@ -27,8 +26,8 @@ dependencies:
 ```
 
 ### Examples
-- [Arduino framework](examples/arduino/PublishAndSubscribe.ino)
-- [ESP-IDF framework](examples/espidf/main/main.cpp)
+- [Arduino framework](examples/arduino/publish_and_subscribe/PublishAndSubscribe.ino)
+- [ESP-IDF framework](examples/espidf/publish_and_subscribe/main/main.cpp)
 
 ### Functionallity verified on the following platforms and frameworks
 - ESP32 (tested with platform I/O [espressif32@6.4.0](https://github.com/platformio/platform-espressif32) / [arduino-esp32@2.0.11](https://github.com/espressif/arduino-esp32) / [ESP-IDF@4.4.6](https://github.com/espressif/esp-idf) / [ESP-IDF@5.1.2](https://github.com/espressif/esp-idf) on ESP32-S2 and ESP32-C3)
