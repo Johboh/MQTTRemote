@@ -1,5 +1,28 @@
 name: PlatformIO CI
-on: [push]
+on: [workflow_call, push]
 jobs:
-  build_examples:
-    uses: ./.github/workflows/platformio_wf.yaml
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example:
+          - name: publish_and_subscribe
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+
+      - name: Build PlatformIO examples
+        run: pio ci --lib="." --board=lolin_s2_mini --board=lolin_c3_mini --board="d1_mini"
+        env:
+          PLATFORMIO_CI_SRC: examples/arduino/${{ matrix.example.name }}
