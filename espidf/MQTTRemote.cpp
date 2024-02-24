@@ -140,22 +140,22 @@ void MQTTRemote::start() {
   ESP_ERROR_CHECK(esp_mqtt_client_start(_mqtt_client));
 }
 
-bool MQTTRemote::publishMessage(std::string topic, std::string message, bool retain) {
+bool MQTTRemote::publishMessage(std::string topic, std::string message, bool retain, uint8_t qos) {
   if (!connected()) {
     ESP_LOGW(MQTTRemoteLog::TAG, "Not connected to server when trying to publish to topic %s.", topic.c_str());
     return false;
   }
-  return esp_mqtt_client_publish(_mqtt_client, topic.c_str(), message.c_str(), message.length(), 0, retain) >= 0;
+  return esp_mqtt_client_publish(_mqtt_client, topic.c_str(), message.c_str(), message.length(), qos, retain) >= 0;
 }
 
-bool MQTTRemote::publishMessageVerbose(std::string topic, std::string message, bool retain) {
+bool MQTTRemote::publishMessageVerbose(std::string topic, std::string message, bool retain, uint8_t qos) {
   if (!connected()) {
     ESP_LOGW(MQTTRemoteLog::TAG, "Not connected to server when trying to publish to topic %s.", topic.c_str());
     return false;
   }
 
   ESP_LOGI(MQTTRemoteLog::TAG, "About to publish message '%s' on topic '%s'...", message.c_str(), topic.c_str());
-  bool r = publishMessage(topic, message, retain);
+  bool r = publishMessage(topic, message, retain, qos);
   ESP_LOGI(MQTTRemoteLog::TAG, "Publish result: %s", (r ? "success" : "failure"));
   return r;
 }

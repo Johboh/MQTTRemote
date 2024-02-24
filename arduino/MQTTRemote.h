@@ -53,14 +53,15 @@ public:
    * @param message The message to send. This cannot be larger than the value set for max_message_size in the
    * constructor.
    * @param retain True to set this message as retained.
+   * @param qos quality of service for published message (0 (default), 1 or 2)
    * @returns true on success, or false on failure.
    */
-  bool publishMessage(std::string topic, std::string message, bool retain = false) override;
+  bool publishMessage(std::string topic, std::string message, bool retain = false, uint8_t qos = 0) override;
 
   /**
    * Same as publishMessage(), but will print the message and topic and the result on serial.
    */
-  bool publishMessageVerbose(std::string topic, std::string message, bool retain = false) override;
+  bool publishMessageVerbose(std::string topic, std::string message, bool retain = false, uint8_t qos = 0) override;
 
   /**
    * @brief returns if there is a connection to the MQTT server.

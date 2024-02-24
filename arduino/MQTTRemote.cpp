@@ -41,21 +41,21 @@ void MQTTRemote::handle() {
   }
 }
 
-bool MQTTRemote::publishMessage(std::string topic, std::string message, bool retain) {
+bool MQTTRemote::publishMessage(std::string topic, std::string message, bool retain, uint8_t qos) {
   if (!connected()) {
     Serial.println(("MQTTRemote: Wanted to publish to topic " + topic + ", but no connection to server.").c_str());
     return false;
   }
-  return _mqtt_client.publish(topic.c_str(), message.c_str(), retain, 0);
+  return _mqtt_client.publish(topic.c_str(), message.c_str(), retain, qos);
 }
 
-bool MQTTRemote::publishMessageVerbose(std::string topic, std::string message, bool retain) {
+bool MQTTRemote::publishMessageVerbose(std::string topic, std::string message, bool retain, uint8_t qos) {
   if (!connected()) {
     Serial.println(("MQTTRemote: Wanted to publish to topic " + topic + ", but no connection to server.").c_str());
     return false;
   }
   Serial.print(("MQTTRemote: About to publish message '" + message + "' on topic '" + topic + "'...: ").c_str());
-  bool r = publishMessage(topic, message, retain);
+  bool r = publishMessage(topic, message, retain, qos);
   Serial.println(std::to_string(r).c_str());
   return r;
 }

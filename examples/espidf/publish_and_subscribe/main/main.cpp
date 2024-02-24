@@ -22,8 +22,10 @@ void blinkAndSerialTask(void *pvParameters) {
 }
 
 void mqttMessageTask(void *pvParameters) {
+  bool retain = false;
+  uint8_t qos = 0;
   while (1) {
-    _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/hello", "world");
+    _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/hello", "world", retain, qos);
     vTaskDelay(10000 / portTICK_PERIOD_MS);
   }
 }

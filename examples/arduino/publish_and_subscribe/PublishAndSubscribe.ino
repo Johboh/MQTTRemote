@@ -52,8 +52,10 @@ void loop() {
 
   // Publish a message every 5 seconds.
   auto now = millis();
+  bool retain = false;
+  uint8_t qos = 0;
   if (now - _last_publish_ms > 5000) {
-    _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/my_topic", "my message, hello!");
+    _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/my_topic", "my message, hello!", retain, qos);
     _last_publish_ms = now;
   }
 }

@@ -21,14 +21,15 @@ public:
    * @param message The message to send. This cannot be larger than the value set for max_message_size in the
    * constructor.
    * @param retain True to set this message as retained.
+   * @param qos quality of service for published message (0 (default), 1 or 2)
    * @returns true on success, or false on failure.
    */
-  virtual bool publishMessage(std::string topic, std::string message, bool retain = false) = 0;
+  virtual bool publishMessage(std::string topic, std::string message, bool retain = false, uint8_t qos = 0) = 0;
 
   /**
    * Same as publishMessage(), but will print the message and topic and the result in console.
    */
-  virtual bool publishMessageVerbose(std::string topic, std::string message, bool retain = false) = 0;
+  virtual bool publishMessageVerbose(std::string topic, std::string message, bool retain = false, uint8_t qos = 0) = 0;
 
   /**
    * @brief Subscribe to a topic. The callback will be invoked on every new message.
