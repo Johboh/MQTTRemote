@@ -17,9 +17,9 @@
     "platforms": ["espressif8266", "espressif32"],
     "examples": [
       {
-          "name": "PublishAndSubscribe",
+          "name": "Publish and subscribe",
           "base": "examples/arduino/publish_and_subscribe",
-          "files": ["PublishAndSubscribe.ino"]
+          "files": ["publish_and_subscribe.ino"]
       }
     ],
     "build": {
