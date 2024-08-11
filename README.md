@@ -1,6 +1,7 @@
 # MQTTRemote
 [![PlatformIO CI](https://github.com/Johboh/MQTTRemote/actions/workflows/platformio.yaml/badge.svg)](https://registry.platformio.org/libraries/johboh/MQTTRemote)
 [![ESP-IDF CI](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf.yaml/badge.svg)](https://components.espressif.com/components/johboh/mqttremote)
+[![Arduino IDE](https://github.com/Johboh/MQTTRemote/actions/workflows/arduino_cli.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote/actions/workflows/arduino_cli.yaml)
 [![GitHub release](https://img.shields.io/github/release/Johboh/MQTTRemote.svg)](https://github.com/Johboh/MQTTRemote/releases)
 [![Clang-format](https://github.com/Johboh/MQTTRemote/actions/workflows/clang-format.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote)
 
@@ -24,6 +25,11 @@ dependencies:
   johboh/MQTTRemote:
     version: ">=4.0.4"
 ```
+
+#### Arduino IDE:
+Search for `MQTTRemote` by `johboh` in the library manager. See note about version above.
+
+__Note__: Need ESP32 core v3.0.3 until [this issue](https://github.com/espressif/arduino-esp32/issues/10084) has been fixed. If you get issues with `undefined reference to `lwip_hook_ip6_input'`, try a different ESP32 core version. Need at least 3+ for C++17 support.
 
 ### Examples
 - [Arduino framework](examples/arduino/publish_and_subscribe/publish_and_subscribe.ino)
