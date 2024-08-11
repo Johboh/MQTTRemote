@@ -27,9 +27,6 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Externalize include file
-        run: mkdir -p includes && cp src/IMQTTRemote.h includes/IMQTTRemote.h
-
       - name: ESP-IDF Build
         uses: espressif/esp-idf-ci-action@v1
         with:

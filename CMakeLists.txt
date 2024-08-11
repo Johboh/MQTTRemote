@@ -2,7 +2,7 @@ FILE(GLOB_RECURSE lib_sources "./espidf/*.*")
 
 idf_component_register(COMPONENT_NAME "MQTTRemote"
                         SRCS ${lib_sources}
-                        INCLUDE_DIRS "./includes/" "./espidf/"
+                        INCLUDE_DIRS "./espidf/"
                         REQUIRES mqtt esp_event)
 
 if(IDF_VERSION_MAJOR LESS 5) # 5+ compiles with c++23.
