@@ -22,7 +22,7 @@ In your existing `idf_component.yml` or in a new `idf_component.yml` next to you
 ```
 dependencies:
   johboh/MQTTRemote:
-    version: ">=4.0.2"
+    version: ">=4.0.3"
 ```
 
 ### Examples
