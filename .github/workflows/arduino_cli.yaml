@@ -22,6 +22,7 @@ jobs:
           arduino-cli config set library.enable_unsafe_install true
           arduino-cli core update-index
           arduino-cli core install esp32:esp32@3.0.2
+          arduino-cli lib install 256dpi/MQTT@^2.5.1
 
       - name: Install repo as library
         run: |
