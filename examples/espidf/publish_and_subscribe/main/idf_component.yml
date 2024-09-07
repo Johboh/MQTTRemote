@@ -1,5 +1,5 @@
 dependencies:
-  johboh/mqttremote:
+  johboh/MQTTRemote:
     #version: ">=4.0.5"
-    # Remove path and enable version to use MQTTRemote from repository
+    # Remove path and include version to use MQTTRemote from repository, and change to johboh/mqttremote (lowercase)
     path: ../../../../
