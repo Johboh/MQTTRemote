@@ -22,7 +22,7 @@ Add the following to `libs_deps`:
 In your existing `idf_component.yml` or in a new `idf_component.yml` next to your main component:
 ```
 dependencies:
-  johboh/MQTTRemote:
+  johboh/mqttremote:
     version: ">=4.0.5"
 ```
 
