@@ -39,6 +39,11 @@ void MQTTRemote::handle() {
   } else if (connected) {
     _mqtt_client.loop();
   }
+
+  if (_on_connected && connected && !_was_connected) {
+    _on_connected();
+  }
+  _was_connected = connected;
 }
 
 bool MQTTRemote::publishMessage(std::string topic, std::string message, bool retain, uint8_t qos) {

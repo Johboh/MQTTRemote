@@ -23,7 +23,7 @@ In your existing `idf_component.yml` or in a new `idf_component.yml` next to you
 ```
 dependencies:
   johboh/mqttremote:
-    version: ">=4.0.5"
+    version: ">=4.0.6"
 ```
 
 #### Arduino IDE:

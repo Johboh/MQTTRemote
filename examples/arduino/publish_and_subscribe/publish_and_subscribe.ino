@@ -34,6 +34,10 @@ void setup() {
   Serial.println("have wifi");
   Serial.print("IP number: ");
   Serial.println(WiFi.localIP());
+
+  _mqtt_remote.setOnConnected([]() {
+    _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/initial_message", "oh hello!", retain, qos);
+  });
 }
 
 void loop() {
