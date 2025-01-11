@@ -55,9 +55,8 @@ void app_main(void) {
     });
 
     // Start MQTT
-    _mqtt_remote.start([]() {
-      _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/initial_message", "oh hello!", retain, qos);
-    });
+    _mqtt_remote.start(
+        []() { _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/initial_message", "oh hello!"); });
 
     // Start task for periodically publishing messages.
     xTaskCreate(mqttMessageTask, "mqttMessageTask", 2048, NULL, 15, NULL);
