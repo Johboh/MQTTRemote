@@ -47,10 +47,11 @@ public:
   void handle();
 
   /**
-   * @brief Set optional callback when client is connected to server (every time, so expect calls on
-   * reconnection). Set to {} to clear callback.
+   * @brief Set optional callback on connect state change. Will be called when the client is connected
+   * to server (every time, so expect calls on reconnection), and on disconnect. The parameter will be true on new
+   * connection and false on disconnection. Set to {} to clear callback.
    */
-  void setOnConnected(std::function<void()> on_connected = {}) { _on_connected = on_connected; };
+  void setOnConnectionChange(std::function<void(bool connected)> callback = {}) { _on_connection_change = callback; };
 
   /**
    * @brief Publish a message.
@@ -115,7 +116,7 @@ private:
   WiFiClient _wifi_client;
   MQTTClient _mqtt_client;
   bool _was_connected = false;
-  std::function<void()> _on_connected;
+  std::function<void(bool)> _on_connection_change;
   std::map<std::string, SubscriptionCallback> _subscriptions;
   unsigned long _last_connection_attempt_timestamp_ms = 0;
 };

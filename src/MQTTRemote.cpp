@@ -40,8 +40,8 @@ void MQTTRemote::handle() {
     _mqtt_client.loop();
   }
 
-  if (_on_connected && connected && !_was_connected) {
-    _on_connected();
+  if (_on_connection_change && connected != _was_connected) {
+    _on_connection_change(connected);
   }
   _was_connected = connected;
 }
