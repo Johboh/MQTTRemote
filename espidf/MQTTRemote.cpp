@@ -28,8 +28,8 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
 #endif
     }
 
-    if (_this->_on_connected) {
-      _this->_on_connected();
+    if (_this->_on_connection_change) {
+      _this->_on_connection_change(true);
     }
 
     break;
@@ -37,6 +37,10 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
   case MQTT_EVENT_DISCONNECTED:
     _this->_connected = false;
     ESP_LOGW(MQTTRemoteLog::TAG, "Disconnected.");
+
+    if (_this->_on_connection_change) {
+      _this->_on_connection_change(false);
+    }
     break;
 
   case MQTT_EVENT_ERROR:
@@ -140,12 +144,12 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   _mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
 }
 
-void MQTTRemote::start(std::function<void()> on_connected) {
+void MQTTRemote::start(std::function<void(bool)> on_connection_change) {
   if (_started) {
     ESP_LOGW(MQTTRemoteLog::TAG, "Already started, cannot start again.");
     return;
   }
-  _on_connected = on_connected;
+  _on_connection_change = on_connection_change;
 
   ESP_ERROR_CHECK(esp_mqtt_client_register_event(_mqtt_client, MQTT_EVENT_ANY, onMqttEvent, this));
   ESP_ERROR_CHECK(esp_mqtt_client_start(_mqtt_client));

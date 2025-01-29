@@ -43,12 +43,13 @@ public:
   /**
    * @brief Call once there is a WIFI connection on which the host can be reached.
    * Will connect to the server and setup any subscriptions as well as start the MQTT loop.
-   * @param on_connected optional callback when client is connected to server (every time, so expect calls on
-   * reconnection).
+   * @param on_connection_change optional callback on connect state change. Will be called when the client is connected
+   * to server (every time, so expect calls on reconnection), and on disconnect. The parameter will be true on new
+   * connection and false on disconnection.
    *
    * NOTE: Can only be called once WIFI has been setup! ESP-IDF will assert otherwise.
    */
-  void start(std::function<void()> on_connected = {});
+  void start(std::function<void(bool)> on_connection_change = {});
   void setup() { start(); }
 
   /**
@@ -119,8 +120,8 @@ private:
   bool _connected;
   std::string _client_id;
   std::string _last_will_topic;
-  std::function<void()> _on_connected;
   esp_mqtt_client_handle_t _mqtt_client;
+  std::function<void(bool)> _on_connection_change;
   std::map<std::string, SubscriptionCallback> _subscriptions;
 };
 
