@@ -1,6 +1,8 @@
 #include "MQTTRemote.h"
 #include <esp_err.h>
 #include <esp_log.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #define RETRY_CONNECT_WAIT_MS 3000
 
@@ -28,19 +30,11 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
 #endif
     }
 
-    if (_this->_on_connection_change) {
-      _this->_on_connection_change(true);
-    }
-
     break;
 
   case MQTT_EVENT_DISCONNECTED:
     _this->_connected = false;
     ESP_LOGW(MQTTRemoteLog::TAG, "Disconnected.");
-
-    if (_this->_on_connection_change) {
-      _this->_on_connection_change(false);
-    }
     break;
 
   case MQTT_EVENT_ERROR:
@@ -144,15 +138,32 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   _mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
 }
 
-void MQTTRemote::start(std::function<void(bool)> on_connection_change) {
+void MQTTRemote::start(std::function<void(bool)> on_connection_change, unsigned long task_size, uint8_t task_priority) {
   if (_started) {
     ESP_LOGW(MQTTRemoteLog::TAG, "Already started, cannot start again.");
     return;
   }
+
   _on_connection_change = on_connection_change;
+  if (_on_connection_change) {
+    xTaskCreate(&runTask, "MQTTRemote_main_task", task_size, this, task_priority, NULL);
+  }
 
   ESP_ERROR_CHECK(esp_mqtt_client_register_event(_mqtt_client, MQTT_EVENT_ANY, onMqttEvent, this));
   ESP_ERROR_CHECK(esp_mqtt_client_start(_mqtt_client));
+}
+
+void MQTTRemote::runTask(void *pvParams) {
+  MQTTRemote *_this = static_cast<MQTTRemote *>(pvParams);
+  while (1) {
+    auto is_connected = _this->connected();
+    if (_this->_on_connection_change && _this->_was_connected != is_connected) {
+      _this->_on_connection_change(is_connected);
+    }
+    _this->_was_connected = is_connected;
+
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+  }
 }
 
 bool MQTTRemote::publishMessage(std::string topic, std::string message, bool retain, uint8_t qos) {

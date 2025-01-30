@@ -10,7 +10,12 @@
 
 namespace MQTTRemoteLog {
 const char TAG[] = "MQTTRemote";
-};
+} // namespace MQTTRemoteLog
+
+namespace MQTTRemoteDefaults {
+const uint32_t DEFAULT_STACK_SIZE = 8192;
+const uint32_t DEFAULT_TASK_PRIORITY = 7;
+} // namespace MQTTRemoteDefaults
 
 /**
  * @brief MQTT wrapper for setting up MQTT connection (and will) and provide API for sending and subscribing to
@@ -45,11 +50,17 @@ public:
    * Will connect to the server and setup any subscriptions as well as start the MQTT loop.
    * @param on_connection_change optional callback on connect state change. Will be called when the client is connected
    * to server (every time, so expect calls on reconnection), and on disconnect. The parameter will be true on new
-   * connection and false on disconnection.
+   * connection and false on disconnection. This callback will run from a dedicated task. Task size and priority can be
+   * set.
+   * @param task_size the stack size for the task that will call the on_connection_change callback, if set. Default:
+   * 4096
+   * @param task_priority the priority for the task that will call the on_connection_change callback, if set. Default: 7
    *
    * NOTE: Can only be called once WIFI has been setup! ESP-IDF will assert otherwise.
    */
-  void start(std::function<void(bool)> on_connection_change = {});
+  void start(std::function<void(bool)> on_connection_change = {},
+             unsigned long task_size = MQTTRemoteDefaults::DEFAULT_STACK_SIZE,
+             uint8_t task_priority = MQTTRemoteDefaults::DEFAULT_TASK_PRIORITY);
   void setup() { start(); }
 
   /**
@@ -115,9 +126,12 @@ private:
    */
   static void onMqttEvent(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data);
 
+  static void runTask(void *pvParams);
+
 private:
   bool _started;
   bool _connected;
+  bool _was_connected;
   std::string _client_id;
   std::string _last_will_topic;
   esp_mqtt_client_handle_t _mqtt_client;
