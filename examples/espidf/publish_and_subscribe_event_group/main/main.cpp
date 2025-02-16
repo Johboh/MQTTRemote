@@ -36,7 +36,7 @@ void mqttMessageTask(void *pvParameters) {
 void mqttConnectionStateChangedTask(void *pvParameters) {
   while (1) {
     // Waiting forever for a change.
-    auto bits = xEventGroupWaitBits(_mqtt_secondary_event_group,
+    auto bits = xEventGroupWaitBits(_conntect_state_changed_event_group,
                                     MQTTRemote::ConnectionState::Connected | MQTTRemote::ConnectionState::Disconnected,
                                     pdTRUE, pdFALSE, portMAX_DELAY);
     auto connected = (bits & MQTTRemote::ConnectionState::Connected) != 0;
@@ -76,7 +76,7 @@ void app_main(void) {
     });
 
     // Start MQTT
-    _mqtt_remote.start(_mqtt_secondary_event_group);
+    _mqtt_remote.start(_conntect_state_changed_event_group);
 
     // Start task for periodically publishing messages.
     xTaskCreate(mqttMessageTask, "mqttMessageTask", 2048, NULL, 15, NULL);
