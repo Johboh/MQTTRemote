@@ -23,6 +23,7 @@ jobs:
             target: esp32c6
         example:
           - name: publish_and_subscribe
+          - name: publish_and_subscribe_event_group
 
     steps:
       - name: Checkout repo
