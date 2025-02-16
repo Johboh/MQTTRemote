@@ -24,6 +24,26 @@ const uint32_t CONNECTION_STATUS_TASK_PRIORITY = 7;
 class MQTTRemote : public IMQTTRemote {
 public:
   /**
+   * Additional configuration where most user can go with defaults.
+   */
+  struct Configuration {
+    /**
+     * Maximum message size, in bytes, for incoming messages. Messages larger than this will be truncated.
+     * This will be allocated on the heap upon MQTTRemote object creation.
+     */
+    uint32_t rx_buffer_size = 1024;
+    /**
+     * Maximum message size, in bytes, for outgoing messages. Messages larger than this will be truncated.
+     * This will be allocated on the heap upon MQTTRemote object creation.
+     */
+    uint32_t tx_buffer_size = 1024;
+    /**
+     * MQTT keep alive interval, in seconds.
+     */
+    uint32_t keep_alive_s = 10;
+  };
+
+  /**
    * @brief Construct a new Remote object
    *
    * To set log level for this object, use: esp_log_level_set(MQTTRemoteLog::TAG, ESP_LOG_*);
@@ -31,19 +51,37 @@ public:
    * A call to start() most follow.
    *
    * @param client_id Base ID for this device. This is used for the last will / status
-   * topic.Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
+   * topic. Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
    * is also used as client ID for the MQTT connection. This has to be [a-zA-Z0-9_] only and unique among all MQTT
    * clients on the server. It should also be stable across connections.
    * @param host MQTT hostname or IP for MQTT server.
    * @param port MQTT port number.
    * @param username MQTT username.
    * @param password MQTT password.
-   * @param max_message_size the max message size one can send. The larger to more memory/RAM is needed. Default: 2048
-   * bytes
-   * @param keep_alive keep alive interval in seconds. Default: 10 seconds
+   */
+  MQTTRemote(std::string client_id, std::string host, int port, std::string username, std::string password)
+      : MQTTRemote(std::move(client_id), std::move(host), port, std::move(username), std::move(password),
+                   Configuration{}) {}
+
+  /**
+   * @brief Construct a new Remote object
+   *
+   * To set log level for this object, use: esp_log_level_set(MQTTRemoteLog::TAG, ESP_LOG_*);
+   *
+   * A call to start() most follow.
+   *
+   * @param client_id Base ID for this device. This is used for the last will / status
+   * topic. Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
+   * is also used as client ID for the MQTT connection. This has to be [a-zA-Z0-9_] only and unique among all MQTT
+   * clients on the server. It should also be stable across connections.
+   * @param host MQTT hostname or IP for MQTT server.
+   * @param port MQTT port number.
+   * @param username MQTT username.
+   * @param password MQTT password.
+   * @param configuration Additional configuration where most user can go with defaults.
    */
   MQTTRemote(std::string client_id, std::string host, int port, std::string username, std::string password,
-             uint16_t max_message_size = 2048, uint32_t keep_alive = 10);
+             Configuration configuration);
 
   /**
    * @brief Call once there is a WIFI connection on which the host can be reached.
@@ -92,10 +130,10 @@ public:
    * Can be called before being connected. All subscriptions will be (re-)subscribed to once a connection is
    * (re-)established.
    *
-   * @param message_callback a message callback with the topic and the message. The topic is repeated for convinience,
+   * @param message_callback a message callback with the topic and the message. The topic is repeated for convenience,
    * but it will always be for the subscribed topic.
-   * @return true if an subcription was successul. Will return false if there is no active MQTT connection. In this
-   * case, the subscription will be performed once connected. Will retun false if this subscription is already
+   * @return true if a subcription was successful. Will return false if there is no active MQTT connection. In this
+   * case, the subscription will be performed once connected. Will return false if this subscription is already
    * subscribed to.
    */
   bool subscribe(std::string topic, IMQTTRemote::SubscriptionCallback message_callback) override;

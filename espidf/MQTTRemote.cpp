@@ -19,7 +19,7 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
     ESP_LOGI(MQTTRemoteLog::TAG, "Connected!");
 
     // And publish that we are now online.
-    _this->publishMessageVerbose(_this->_client_id + "/status", "online", true);
+    _this->publishMessageVerbose(_this->_last_will_topic, "online", true);
 
     // Subscribe to all topics.
     for (const auto &subscription : _this->_subscriptions) {
@@ -86,7 +86,7 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
 }
 
 MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::string username, std::string password,
-                       uint16_t max_message_size, uint32_t keep_alive)
+                       Configuration configuration)
     : _client_id(client_id), _last_will_topic(_client_id + "/status") {
 
   esp_mqtt_client_config_t mqtt_cfg = {};
@@ -95,7 +95,8 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.broker.address.transport = MQTT_TRANSPORT_OVER_TCP; // TODO: Support TLS
   mqtt_cfg.broker.address.port = port;
 
-  mqtt_cfg.buffer.size = max_message_size;
+  mqtt_cfg.buffer.size = configuration.rx_buffer_size;
+  mqtt_cfg.buffer.out_size = configuration.tx_buffer_size;
 
   mqtt_cfg.credentials.username = username.c_str();
   mqtt_cfg.credentials.client_id = client_id.c_str();
@@ -104,7 +105,7 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.network.reconnect_timeout_ms = RETRY_CONNECT_WAIT_MS;
   mqtt_cfg.network.disable_auto_reconnect = false;
 
-  mqtt_cfg.session.keepalive = keep_alive;
+  mqtt_cfg.session.keepalive = configuration.keep_alive_s;
   mqtt_cfg.session.disable_keepalive = false;
 
   mqtt_cfg.session.last_will.topic = _last_will_topic.c_str();
@@ -116,7 +117,8 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.transport = MQTT_TRANSPORT_OVER_TCP; // TODO: Support TLS
   mqtt_cfg.port = port;
 
-  mqtt_cfg.buffer_size = max_message_size;
+  mqtt_cfg.buffer.size = configuration.rx_buffer_size;
+  mqtt_cfg.buffer.out_size = configuration.tx_buffer_size;
 
   mqtt_cfg.username = username.c_str();
   mqtt_cfg.client_id = client_id.c_str();
@@ -125,7 +127,7 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.reconnect_timeout_ms = RETRY_CONNECT_WAIT_MS;
   mqtt_cfg.disable_auto_reconnect = false;
 
-  mqtt_cfg.keepalive = keep_alive;
+  mqtt_cfg.keepalive = configuration.keep_alive_s;
   mqtt_cfg.disable_keepalive = false;
 
   mqtt_cfg.lwt_topic = _last_will_topic.c_str();

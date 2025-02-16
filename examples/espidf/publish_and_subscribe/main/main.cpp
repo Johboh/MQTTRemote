@@ -9,7 +9,8 @@
 
 #define PIN_LED GPIO_NUM_14
 
-MQTTRemote _mqtt_remote(mqtt_client_id, mqtt_host, 1883, mqtt_username, mqtt_password, 2048, 10);
+MQTTRemote _mqtt_remote(mqtt_client_id, mqtt_host, 1883, mqtt_username, mqtt_password,
+                        MQTTRemote::Configuration{.rx_buffer_size = 2048, .tx_buffer_size = 2048, .keep_alive_s = 10});
 
 void blinkAndSerialTask(void *pvParameters) {
   bool swap = false;
