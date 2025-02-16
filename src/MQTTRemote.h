@@ -22,7 +22,29 @@
 class MQTTRemote : public IMQTTRemote {
 public:
   /**
-   * @brief Construct a new Remote object
+   * Additional configuration where most user can go with defaults.
+   */
+  struct Configuration {
+    /**
+     * Maximum message size, in bytes, for incoming and outgoing messages. Messages larger than this will be truncated.
+     * This will be allocated on the heap upon MQTTRemote object creation.
+     */
+    uint32_t buffer_size = 1024;
+
+    /**
+     * MQTT keep alive interval, in seconds.
+     */
+    uint32_t keep_alive_s = 10;
+
+    /**
+     * if true, will print on Serial on message received. Publish verbosity is controlled by the
+     * which publish method that is used. Connection information on setup will always be printed out.
+     */
+    bool receive_verbose = false;
+  };
+
+  /**
+   * @brief Construct a new MQTTRemote object
    *
    * @param client_id Base ID for this device. This is used for the last will / status
    * topic.Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
@@ -32,14 +54,27 @@ public:
    * @param port MQTT port number.
    * @param username MQTT username.
    * @param password MQTT password.
-   * @param max_message_size the max message size one can send. The larger to more memory/RAM is needed. Default: 2048
-   * bytes
-   * @param keep_alive keep alive interval in seconds. Default: 10 seconds
-   * @param receive_verbose if true, will print on Serial on message received. Publish verbosity is controlled by the
-   * which publish method that is used. Connection information on setup will always be printed out.
+   * @param configuration Additional configuration where most user can go with defaults.
+   */
+  MQTTRemote(std::string client_id, std::string host, int port, std::string username, std::string password)
+      : MQTTRemote(std::move(client_id), std::move(host), port, std::move(username), std::move(password),
+                   Configuration{}) {}
+
+  /**
+   * @brief Construct a new MQTTRemote object
+   *
+   * @param client_id Base ID for this device. This is used for the last will / status
+   * topic.Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
+   * is also used as client ID for the MQTT connection. This has to be [a-zA-Z0-9_] only and unique among all MQTT
+   * clients on the server. It should also be stable across connections.
+   * @param host MQTT hostname or IP for MQTT server.
+   * @param port MQTT port number.
+   * @param username MQTT username.
+   * @param password MQTT password.
+   * @param configuration Additional configuration where most user can go with defaults.
    */
   MQTTRemote(std::string client_id, std::string host, int port, std::string username, std::string password,
-             uint16_t max_message_size = 2048, uint32_t keep_alive = 10, bool receive_verbose = true);
+             Configuration configuration);
 
   /**
    * Call from Arduino loop() function in main.

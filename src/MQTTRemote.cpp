@@ -3,11 +3,11 @@
 #define RETRY_CONNECT_WAIT_MS 3000
 
 MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::string username, std::string password,
-                       uint16_t max_message_size, uint32_t keep_alive, bool receive_verbose)
-    : _client_id(client_id), _host(host), _username(username), _password(password), _receive_verbose(receive_verbose),
-      _mqtt_client(max_message_size) {
+                       Configuration configuration)
+    : _client_id(client_id), _host(host), _username(username), _password(password),
+      _receive_verbose(configuration.receive_verbose), _mqtt_client(configuration.buffer_size) {
   _mqtt_client.begin(_host.c_str(), port, _wifi_client);
-  _mqtt_client.setKeepAlive(keep_alive);
+  _mqtt_client.setKeepAlive(configuration.keep_alive_s);
   std::function<void(MQTTClient * client, char topic[], char bytes[], int length)> callback =
       std::bind(&MQTTRemote::onMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
                 std::placeholders::_4);

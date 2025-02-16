@@ -61,7 +61,7 @@ public:
   };
 
   /**
-   * @brief Construct a new Remote object
+   * @brief Construct a new MQTTRemote object
    *
    * To set log level for this object, use: esp_log_level_set(MQTTRemoteLog::TAG, ESP_LOG_*);
    *
@@ -81,7 +81,7 @@ public:
                    Configuration{}) {}
 
   /**
-   * @brief Construct a new Remote object
+   * @brief Construct a new MQTTRemote object
    *
    * To set log level for this object, use: esp_log_level_set(MQTTRemoteLog::TAG, ESP_LOG_*);
    *
