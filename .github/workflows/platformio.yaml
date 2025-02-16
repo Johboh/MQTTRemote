@@ -7,6 +7,10 @@ jobs:
       matrix:
         example:
           - name: publish_and_subscribe
+        board:
+          - lolin_s2_mini
+          - lolin_c3_mini
+          - d1_mini
 
     steps:
       - uses: actions/checkout@v3
@@ -23,6 +27,6 @@ jobs:
         run: pip install --upgrade platformio
 
       - name: Build PlatformIO examples
-        run: pio ci --lib="." --board=lolin_s2_mini --board=lolin_c3_mini --board="d1_mini"
+        run: pio ci --lib="." --board=${{ matrix.board.name }}
         env:
           PLATFORMIO_CI_SRC: examples/arduino/${{ matrix.example.name }}
