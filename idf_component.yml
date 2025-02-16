@@ -1,4 +1,4 @@
-version: "5.0.2"
+version: "5.0.3"
 description: MQTT wrapper for setting up an MQTT connection
 url: https://github.com/Johboh/MQTTRemote
 dependencies:
