@@ -8,6 +8,15 @@ jobs:
   upload_library:
     runs-on: ubuntu-latest
     needs: [build_examples_for_verification]
+
+    strategy:
+      matrix:
+        target:
+          - name: espidf
+            library: library.json
+          - name: esp8266
+            library: library.json.esp8266
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -15,6 +24,10 @@ jobs:
           python-version: '3.9'
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
+
+      - name: Copy library.json to root (if not src is also in root)
+        run: mv ${{ matrix.target.library }} ./library.json || true
+        if: ${{ matrix.target.library != './library.json' }}
 
       - name: Publish PlatformIO library
         run: pio pkg publish --owner johboh --no-notify --no-interactive

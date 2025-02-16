@@ -1,0 +1,35 @@
+{
+    "name": "MQTTRemote8266",
+    "keywords": "esp8266, mqtt",
+    "description": "MQTT wrapper for setting up an MQTT connection (ESP8266 version)",
+    "authors":
+    {
+      "name": "Johan Böhlin"
+    },
+    "version": "6.0.0",
+    "license": "MIT",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/Johboh/MQTTRemote.git"
+    },
+    "frameworks": "arduino",
+    "platforms": ["espressif8266"],
+    "examples": [
+      {
+          "name": "Publish and subscribe",
+          "base": "examples/arduino/esp8266/publish_and_subscribe",
+          "files": ["publish_and_subscribe.ino"]
+      }
+    ],
+    "build": {
+      "srcDir":"src"
+    },
+    "dependencies": [
+        {
+          "owner": "256dpi",
+          "name": "MQTT",
+          "version": "^2.5.1"
+        }
+      ]
+  }

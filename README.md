@@ -13,10 +13,15 @@ Given the MQTT host and credentials, it connects to the host and reconnect on co
 On connection, it publish `online` to the `client-id/status` topic, and sets up a last will to publish `offline` to the same topic on connection loss/device offline. This is a common practice for devices running as Home Assistant nodes.
 
 ### Installation
-#### PlatformIO (Arduino or ESP-IDF):
+#### PlatformIO ESP32 (Arduino or ESP-IDF):
 Add the following to `libs_deps`:
 ```
    Johboh/MQTTRemote
+```
+#### PlatformIO ESP8266 (Arduino only):
+Add the following to `libs_deps`:
+```
+   Johboh/MQTTRemote8266
 ```
 #### Espressif IoT Development Framework:
 In your existing `idf_component.yml` or in a new `idf_component.yml` next to your main component:
@@ -32,7 +37,8 @@ Search for `MQTTRemote` by `johboh` in the library manager. See note about versi
 __Note__: Need ESP32 core v3.0.3 until [this issue](https://github.com/espressif/arduino-esp32/issues/10084) has been fixed. If you get issues with `undefined reference to `lwip_hook_ip6_input'`, try a different ESP32 core version. Need at least 3+ for C++17 support.
 
 ### Examples
-- [Arduino framework](examples/arduino/publish_and_subscribe/publish_and_subscribe.ino)
+- [ESP8266 Arduino framework](examples/arduino/esp8266/publish_and_subscribe/publish_and_subscribe.ino)
+- [ESP32 Arduino framework](examples/arduino/esp32/publish_and_subscribe/publish_and_subscribe.ino)
 - [ESP-IDF framework](examples/espidf/publish_and_subscribe/main/main.cpp)
 
 ### Functionallity verified on the following platforms and frameworks
@@ -42,4 +48,4 @@ __Note__: Need ESP32 core v3.0.3 until [this issue](https://github.com/espressif
 Newer version most probably work too, but they have not been verified.
 
 ### Dependencies
-- For Arduino: https://github.com/256dpi/arduino-mqtt @^2.5.1
+- For Arduino ESP8266 only: https://github.com/256dpi/arduino-mqtt @^2.5.1

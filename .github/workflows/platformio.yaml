@@ -9,8 +9,14 @@ jobs:
           - name: publish_and_subscribe
         board:
           - name: lolin_s2_mini
+            library: library.json
+            example_root: examples/arduino/esp32/
           - name: lolin_c3_mini
+            library: library.json
+            example_root: examples/arduino/esp32/
           - name: d1_mini
+            library: library.json.esp8266
+            example_root: examples/arduino/esp8266/
 
     steps:
       - uses: actions/checkout@v3
@@ -26,7 +32,11 @@ jobs:
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
 
+      - name: Copy library.json to root (if not src is also in root)
+        run: mv ${{ matrix.board.library }} ./library.json || true
+        if: ${{ matrix.board.library != './library.json' }}
+
       - name: Build PlatformIO examples
         run: pio ci --lib="." --board=${{ matrix.board.name }} --project-option="build_unflags=-std=gnu++11" --project-option="build_flags=-std=gnu++17"
         env:
-          PLATFORMIO_CI_SRC: examples/arduino/${{ matrix.example.name }}
+          PLATFORMIO_CI_SRC: ${{ matrix.board.example_root }}${{ matrix.example.name }}

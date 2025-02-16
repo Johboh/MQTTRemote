@@ -1,13 +1,12 @@
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
 #include <MQTTRemote.h>
 #include <string>
-#ifdef ESP32
-#include <WiFi.h>
-#elif ESP8266
-#include <ESP8266WiFi.h>
-#else
-#error "Unsupported hardware. Sorry!"
-#endif
+
+/**
+ * @brief ESP8266 / Arduino CLI/IDE example version
+ * Connects to an MQTT broker and publishes and subscribes to topics.
+ */
 
 const char wifi_ssid[] = "my-wifi-ssid";
 const char wifi_password[] = "my-wifi-password";
@@ -37,29 +36,26 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   _mqtt_remote.setOnConnectionChange([](bool connected) {
-    _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/initial_message", "oh hello!");
+    if (connected) {
+      _mqtt_remote.subscribe(
+          _mqtt_remote.clientId() + "/interesting/topic", [](std::string topic, std::string message) {
+            Serial.println(("Got message [" + message + "] on topic: " + topic).c_str());
+
+            _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/initial_message", "oh hello!");
+          });
+    }
   });
 }
 
 void loop() {
   _mqtt_remote.handle();
 
-  // Subscribe to the topic "my-client/interesting/topic" on new connection.
-  auto connected = _mqtt_remote.connected();
-  if (!_was_connected && connected) {
-    _mqtt_remote.subscribe(_mqtt_remote.clientId() + "/interesting/topic", [](std::string topic, std::string message) {
-      Serial.println(("Got message [" + message + "] on topic: " + topic).c_str());
-    });
-  } else if (_was_connected && !connected) {
-    _mqtt_remote.unsubscribe(_mqtt_remote.clientId() + "/interesting/topic");
-  }
-  _was_connected = connected;
-
   // Publish a message every 5 seconds.
   auto now = millis();
-  bool retain = false;
-  uint8_t qos = 0;
-  if (now - _last_publish_ms > 5000) {
+  auto connected = _mqtt_remote.connected();
+  if (connected && (now - _last_publish_ms > 5000)) {
+    bool retain = false;
+    uint8_t qos = 0;
     _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/my_topic", "my message, hello!", retain, qos);
     _last_publish_ms = now;
   }
