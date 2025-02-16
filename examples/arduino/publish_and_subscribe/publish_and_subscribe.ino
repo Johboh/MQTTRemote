@@ -17,7 +17,7 @@ const char mqtt_username[] = "my-username";
 const char mqtt_password[] = "my-password";
 
 MQTTRemote _mqtt_remote(mqtt_client_id, mqtt_host, 1883, mqtt_username, mqtt_password,
-                        MQTTRemote::Configuration{.buffer_size = 2048, .keep_alive_s = 10, .receive_verbose = true});
+                        {.buffer_size = 2048, .keep_alive_s = 10, .receive_verbose = true});
 
 bool _was_connected = false;
 unsigned long _last_publish_ms = 0;
