@@ -117,8 +117,8 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.transport = MQTT_TRANSPORT_OVER_TCP; // TODO: Support TLS
   mqtt_cfg.port = port;
 
-  mqtt_cfg.buffer.size = configuration.rx_buffer_size;
-  mqtt_cfg.buffer.out_size = configuration.tx_buffer_size;
+  mqtt_cfg.buffer_size = configuration.rx_buffer_size;
+  mqtt_cfg.buffer_out_size = configuration.tx_buffer_size;
 
   mqtt_cfg.username = username.c_str();
   mqtt_cfg.client_id = client_id.c_str();
