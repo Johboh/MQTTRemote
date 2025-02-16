@@ -47,14 +47,13 @@ public:
    * @brief Construct a new MQTTRemote object
    *
    * @param client_id Base ID for this device. This is used for the last will / status
-   * topic.Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
+   * topic. Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
    * is also used as client ID for the MQTT connection. This has to be [a-zA-Z0-9_] only and unique among all MQTT
    * clients on the server. It should also be stable across connections.
    * @param host MQTT hostname or IP for MQTT server.
    * @param port MQTT port number.
    * @param username MQTT username.
    * @param password MQTT password.
-   * @param configuration Additional configuration where most user can go with defaults.
    */
   MQTTRemote(std::string client_id, std::string host, int port, std::string username, std::string password)
       : MQTTRemote(std::move(client_id), std::move(host), port, std::move(username), std::move(password),
@@ -64,7 +63,7 @@ public:
    * @brief Construct a new MQTTRemote object
    *
    * @param client_id Base ID for this device. This is used for the last will / status
-   * topic.Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
+   * topic. Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
    * is also used as client ID for the MQTT connection. This has to be [a-zA-Z0-9_] only and unique among all MQTT
    * clients on the server. It should also be stable across connections.
    * @param host MQTT hostname or IP for MQTT server.
