@@ -113,7 +113,9 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.session.last_will.qos = 0;
   mqtt_cfg.session.last_will.retain = 0;
 
-  mqtt_cfg.task.stack_size = configuration.task_size;
+  if (configuration.task_size) {
+    mqtt_cfg.task.stack_size = *configuration.task_size;
+  }
 #else
   mqtt_cfg.host = host.c_str();
   mqtt_cfg.transport = MQTT_TRANSPORT_OVER_TCP; // TODO: Support TLS
@@ -138,7 +140,9 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.lwt_qos = 0;
   mqtt_cfg.lwt_retain = 0;
 
-  mqtt_cfg.task_size = configuration.task_size;
+  if (configuration.task_size) {
+    mqtt_cfg.task_stack = *configuration.task_size;
+  }
 #endif
 
   _mqtt_client = esp_mqtt_client_init(&mqtt_cfg);

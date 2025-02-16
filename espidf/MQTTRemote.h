@@ -6,6 +6,7 @@
 #include <functional>
 #include <map>
 #include <mqtt_client.h>
+#include <optional>
 #include <string>
 
 namespace MQTTRemoteLog {
@@ -42,8 +43,9 @@ public:
     /**
      * Task size to use for the ESP-IDF MQTT task. If you are handling large and/or many messages (queues), you might
      * need to increase this.
+     * Normally defaults to 6144 bytes, setting this to non std::opt will override setting from menuconfig.
      */
-    uint32_t task_size = 4096;
+    std::optional<uint32_t> task_size = 4096;
 
     /**
      * MQTT keep alive interval, in seconds.
