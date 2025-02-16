@@ -8,9 +8,9 @@ jobs:
         example:
           - name: publish_and_subscribe
         board:
-          - lolin_s2_mini
-          - lolin_c3_mini
-          - d1_mini
+          - name: lolin_s2_mini
+          - name: lolin_c3_mini
+          - name: d1_mini
 
     steps:
       - uses: actions/checkout@v3
