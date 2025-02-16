@@ -1,11 +1,17 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
 #include <MQTTRemote.h>
 #include <string>
+#ifdef ESP32
+#include <WiFi.h>
+#elif ESP8266
+#include <ESP8266WiFi.h>
+#else
+#error "Unsupported hardware. Sorry!"
+#endif
 
 /**
- * @brief ESP8266 example version (when using Arduino CLI/IDE or PlatformIO)
- * Connects to an MQTT broker and publishes and subscribes to topics.
+ * @brief Example when using ESP8266 with either Arduino IDE/CLI or PlatformIO, or when using ESP32 with Arduino
+ * IDE/CLI. Connects to an MQTT broker and publishes and subscribes to topics.
  */
 
 const char wifi_ssid[] = "my-wifi-ssid";

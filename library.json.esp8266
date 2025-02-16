@@ -18,7 +18,7 @@
     "examples": [
       {
           "name": "Publish and subscribe",
-          "base": "examples/arduino/esp8266/publish_and_subscribe",
+          "base": "examples/arduino/legacy_stack/publish_and_subscribe",
           "files": ["publish_and_subscribe.ino"]
       }
     ],

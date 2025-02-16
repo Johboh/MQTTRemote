@@ -10,13 +10,13 @@ jobs:
         board:
           - name: lolin_s2_mini
             library: library.json
-            example_root: examples/arduino/esp32/
+            example_root: examples/arduino/espidf_stack/
           - name: lolin_c3_mini
             library: library.json
-            example_root: examples/arduino/esp32/
+            example_root: examples/arduino/espidf_stack/
           - name: d1_mini
             library: library.json.esp8266
-            example_root: examples/arduino/esp8266/
+            example_root: examples/arduino/legacy_stack/
 
     steps:
       - uses: actions/checkout@v3
