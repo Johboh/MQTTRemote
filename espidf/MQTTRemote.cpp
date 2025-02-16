@@ -120,7 +120,7 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.port = port;
 
   mqtt_cfg.buffer_size = configuration.rx_buffer_size;
-  mqtt_cfg.buffer_out_size = configuration.tx_buffer_size;
+  mqtt_cfg.out_buffer_size = configuration.tx_buffer_size;
 
   mqtt_cfg.username = username.c_str();
   mqtt_cfg.client_id = client_id.c_str();
