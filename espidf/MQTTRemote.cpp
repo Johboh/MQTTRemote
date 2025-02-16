@@ -151,6 +151,8 @@ void MQTTRemote::start(std::function<void(bool)> on_connection_change, unsigned 
 
   ESP_ERROR_CHECK(esp_mqtt_client_register_event(_mqtt_client, MQTT_EVENT_ANY, onMqttEvent, this));
   ESP_ERROR_CHECK(esp_mqtt_client_start(_mqtt_client));
+
+  _started = true;
 }
 
 void MQTTRemote::runTask(void *pvParams) {

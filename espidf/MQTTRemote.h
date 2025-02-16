@@ -13,8 +13,8 @@ const char TAG[] = "MQTTRemote";
 } // namespace MQTTRemoteLog
 
 namespace MQTTRemoteDefaults {
-const uint32_t DEFAULT_STACK_SIZE = 4096;
-const uint32_t DEFAULT_TASK_PRIORITY = 7;
+const uint32_t CONNECTION_STATUS_STACK_SIZE = 4096;
+const uint32_t CONNECTION_STATUS_TASK_PRIORITY = 7;
 } // namespace MQTTRemoteDefaults
 
 /**
@@ -52,15 +52,14 @@ public:
    * to server (every time, so expect calls on reconnection), and on disconnect. The parameter will be true on new
    * connection and false on disconnection. This callback will run from a dedicated task. Task size and priority can be
    * set.
-   * @param task_size the stack size for the task that will call the on_connection_change callback, if set. Default:
-   * 4096
-   * @param task_priority the priority for the task that will call the on_connection_change callback, if set. Default: 7
+   * @param task_size the stack size for the task that will call the on_connection_change callback, if set.
+   * @param task_priority the priority for the task that will call the on_connection_change callback, if set.
    *
    * NOTE: Can only be called once WIFI has been setup! ESP-IDF will assert otherwise.
    */
   void start(std::function<void(bool)> on_connection_change = {},
-             unsigned long task_size = MQTTRemoteDefaults::DEFAULT_STACK_SIZE,
-             uint8_t task_priority = MQTTRemoteDefaults::DEFAULT_TASK_PRIORITY);
+             unsigned long task_size = MQTTRemoteDefaults::CONNECTION_STATUS_STACK_SIZE,
+             uint8_t task_priority = MQTTRemoteDefaults::CONNECTION_STATUS_TASK_PRIORITY);
   void setup() { start(); }
 
   /**
@@ -129,10 +128,10 @@ private:
   static void runTask(void *pvParams);
 
 private:
-  bool _started;
-  bool _connected;
-  bool _was_connected;
+  bool _started = false;
   std::string _client_id;
+  bool _connected = false;
+  bool _was_connected = false;
   std::string _last_will_topic;
   esp_mqtt_client_handle_t _mqtt_client;
   std::function<void(bool)> _on_connection_change;
