@@ -4,7 +4,7 @@
 #include <string>
 
 /**
- * @brief ESP8266 / Arduino CLI/IDE example version
+ * @brief ESP8266 example version (when using Arduino CLI/IDE or PlatformIO)
  * Connects to an MQTT broker and publishes and subscribes to topics.
  */
 

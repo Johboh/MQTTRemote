@@ -23,6 +23,8 @@ Add the following to `libs_deps`:
 ```
    Johboh/MQTTRemote8266
 ```
+#### Arduino IDE:
+Search for `MQTTRemote` by `johboh` in the library manager.
 #### Espressif IoT Development Framework:
 In your existing `idf_component.yml` or in a new `idf_component.yml` next to your main component:
 ```
