@@ -13,7 +13,7 @@ const char TAG[] = "MQTTRemote";
 } // namespace MQTTRemoteLog
 
 namespace MQTTRemoteDefaults {
-const uint32_t DEFAULT_STACK_SIZE = 8192;
+const uint32_t DEFAULT_STACK_SIZE = 4096;
 const uint32_t DEFAULT_TASK_PRIORITY = 7;
 } // namespace MQTTRemoteDefaults
 
