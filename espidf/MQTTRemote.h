@@ -32,11 +32,19 @@ public:
      * This will be allocated on the heap upon MQTTRemote object creation.
      */
     uint32_t rx_buffer_size = 1024;
+
     /**
      * Maximum message size, in bytes, for outgoing messages. Messages larger than this will be truncated.
      * This will be allocated on the heap upon MQTTRemote object creation.
      */
     uint32_t tx_buffer_size = 1024;
+
+    /**
+     * Task size to use for the ESP-IDF MQTT task. If you are handling large and/or many messages (queues), you might
+     * need to increase this.
+     */
+    uint32_t task_size = 4096;
+
     /**
      * MQTT keep alive interval, in seconds.
      */
