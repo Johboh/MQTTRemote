@@ -15,8 +15,9 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
 
   switch ((esp_mqtt_event_id_t)event_id) {
   case MQTT_EVENT_CONNECTED:
-    _this->_connected = true;
     ESP_LOGI(MQTTRemoteLog::TAG, "Connected!");
+    _this->_connected = true;
+    xEventGroupSetBits(_this->_connection_state_changed_event_group, ConnectionState::Connected);
 
     // And publish that we are now online.
     _this->publishMessageVerbose(_this->_last_will_topic, "online", true);
@@ -33,8 +34,9 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
     break;
 
   case MQTT_EVENT_DISCONNECTED:
-    _this->_connected = false;
     ESP_LOGW(MQTTRemoteLog::TAG, "Disconnected.");
+    _this->_connected = false;
+    xEventGroupSetBits(_this->_connection_state_changed_event_group, ConnectionState::Disconnected);
     break;
 
   case MQTT_EVENT_ERROR:
@@ -154,11 +156,29 @@ void MQTTRemote::start(std::function<void(bool)> on_connection_change, unsigned 
     return;
   }
 
+  _connection_state_changed_event_group = xEventGroupCreate();
+
   _on_connection_change = on_connection_change;
   if (_on_connection_change) {
     xTaskCreate(&runTask, "MQTTRemote_main_task", task_size, this, task_priority, NULL);
   }
 
+  startInternal();
+}
+
+void MQTTRemote::start(EventGroupHandle_t connection_state_changed_event_group) {
+  if (_started) {
+    ESP_LOGW(MQTTRemoteLog::TAG, "Already started, cannot start again.");
+    return;
+  }
+
+  _connection_state_changed_event_group = connection_state_changed_event_group;
+
+  startInternal();
+}
+
+void MQTTRemote::startInternal() {
+  xEventGroupClearBits(_connection_state_changed_event_group, 0xFF);
   ESP_ERROR_CHECK(esp_mqtt_client_register_event(_mqtt_client, MQTT_EVENT_ANY, onMqttEvent, this));
   ESP_ERROR_CHECK(esp_mqtt_client_start(_mqtt_client));
 
@@ -168,13 +188,15 @@ void MQTTRemote::start(std::function<void(bool)> on_connection_change, unsigned 
 void MQTTRemote::runTask(void *pvParams) {
   MQTTRemote *_this = static_cast<MQTTRemote *>(pvParams);
   while (1) {
-    auto is_connected = _this->connected();
-    if (_this->_on_connection_change && _this->_was_connected != is_connected) {
-      _this->_on_connection_change(is_connected);
+    auto event_bits =
+        xEventGroupWaitBits(_this->_connection_state_changed_event_group,
+                            MQTTRemote::ConnectionState::Connected | MQTTRemote::ConnectionState::Disconnected, pdTRUE,
+                            pdFALSE, portMAX_DELAY);
+    if ((event_bits & MQTTRemote::ConnectionState::Connected) != 0) {
+      _this->_on_connection_change(true);
+    } else if ((event_bits & MQTTRemote::ConnectionState::Disconnected) != 0) {
+      _this->_on_connection_change(false);
     }
-    _this->_was_connected = is_connected;
-
-    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 

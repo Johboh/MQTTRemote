@@ -3,6 +3,8 @@
 
 #include "IMQTTRemote.h"
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/event_groups.h>
 #include <functional>
 #include <map>
 #include <mqtt_client.h>
@@ -24,6 +26,11 @@ const uint32_t CONNECTION_STATUS_TASK_PRIORITY = 7;
  */
 class MQTTRemote : public IMQTTRemote {
 public:
+  enum ConnectionState : uint8_t {
+    Connected = BIT0,
+    Disconnected = BIT1,
+  };
+
   /**
    * Additional configuration where most user can go with defaults.
    */
@@ -96,10 +103,10 @@ public:
   /**
    * @brief Call once there is a WIFI connection on which the host can be reached.
    * Will connect to the server and setup any subscriptions as well as start the MQTT loop.
-   * @param on_connection_change optional callback on connect state change. Will be called when the client is connected
-   * to server (every time, so expect calls on reconnection), and on disconnect. The parameter will be true on new
-   * connection and false on disconnection. This callback will run from a dedicated task. Task size and priority can be
-   * set.
+   * @param on_connection_change optional callback on connection state change. Will be called when the client is
+   * connected to server (every time, so expect calls on reconnection), and on disconnect. The parameter will be true on
+   * new connection and false on disconnection. This callback will run from a dedicated task. Task size and priority can
+   * be set.
    * @param task_size the stack size for the task that will call the on_connection_change callback, if set.
    * @param task_priority the priority for the task that will call the on_connection_change callback, if set.
    *
@@ -108,7 +115,17 @@ public:
   void start(std::function<void(bool)> on_connection_change = {},
              unsigned long task_size = MQTTRemoteDefaults::CONNECTION_STATUS_STACK_SIZE,
              uint8_t task_priority = MQTTRemoteDefaults::CONNECTION_STATUS_TASK_PRIORITY);
-  void setup() { start(); }
+
+  /**
+   * @brief Call once there is a WIFI connection on which the host can be reached.
+   * Will connect to the server and setup any subscriptions as well as start the MQTT loop.
+   * @param connection_state_changed_event_group optional event group for connection state change. Will be be set with
+   * ConnectionState::Connected when the client is connected to server (every time, so expect re-setting on
+   * reconnection), and ConnectionState::Disconnected on disconnect.
+   *
+   * NOTE: Can only be called once WIFI has been setup! ESP-IDF will assert otherwise.
+   */
+  void start(EventGroupHandle_t connection_state_changed_event_group);
 
   /**
    * @brief Publish a message.
@@ -161,6 +178,8 @@ public:
   std::string &clientId() override { return _client_id; }
 
 private:
+  void startInternal();
+
   /*
    * @brief Event handler registered to receive MQTT events
    *
@@ -179,10 +198,10 @@ private:
   bool _started = false;
   std::string _client_id;
   bool _connected = false;
-  bool _was_connected = false;
   std::string _last_will_topic;
   esp_mqtt_client_handle_t _mqtt_client;
   std::function<void(bool)> _on_connection_change;
+  EventGroupHandle_t _connection_state_changed_event_group;
   std::map<std::string, SubscriptionCallback> _subscriptions;
 };
 
