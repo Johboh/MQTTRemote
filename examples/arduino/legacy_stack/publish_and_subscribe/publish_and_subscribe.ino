@@ -10,8 +10,8 @@
 #endif
 
 /**
- * @brief Example when using ESP8266 with either Arduino IDE/CLI or PlatformIO, or when using ESP32 with Arduino
- * IDE/CLI. Connects to an MQTT broker and publishes and subscribes to topics.
+ * Example when using ESP8266 and Platform IO with Arduino or ESP32/ESP8266 with Arduino IDE/CLI
+ * Connects to an MQTT broker and publishes and subscribes to topics.
  */
 
 const char wifi_ssid[] = "my-wifi-ssid";

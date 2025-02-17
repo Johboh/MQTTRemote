@@ -39,8 +39,9 @@ Search for `MQTTRemote` by `johboh` in the library manager. See note about versi
 __Note__: Need ESP32 core v3.0.3 until [this issue](https://github.com/espressif/arduino-esp32/issues/10084) has been fixed. If you get issues with `undefined reference to `lwip_hook_ip6_input'`, try a different ESP32 core version. Need at least 3+ for C++17 support.
 
 ### Examples
-- [ESP8266 Arduino framework](examples/arduino/legacy_stack/publish_and_subscribe/publish_and_subscribe.ino)
-- [ESP32 Arduino framework](examples/arduino/espidf_stack/publish_and_subscribe/publish_and_subscribe.ino)
+- [Using Arduino IDE/CLI](examples/arduino/legacy_stack/publish_and_subscribe/publish_and_subscribe.ino)
+- [Platform IO Arduino ESP32](examples/arduino/espidf_stack/publish_and_subscribe/publish_and_subscribe.ino)
+- [Platform IO Arduino ESP8266](examples/arduino/legacy_stack/publish_and_subscribe/publish_and_subscribe.ino)
 - [ESP-IDF framework](examples/espidf/publish_and_subscribe/main/main.cpp)
 
 ### Functionallity verified on the following platforms and frameworks

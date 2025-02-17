@@ -4,7 +4,7 @@
 #include <string>
 
 /**
- * @brief ESP32 example version
+ * Example when using ESP32 and Platform IO with Arduino
  * Connects to an MQTT broker and publishes and subscribes to topics.
  */
 
