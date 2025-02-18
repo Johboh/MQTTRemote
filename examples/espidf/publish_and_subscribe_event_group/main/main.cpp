@@ -10,7 +10,7 @@
 
 #define PIN_LED GPIO_NUM_14
 
-auto _conntect_state_changed_event_group = xEventGroupCreate();
+auto _connection_state_changed_event_group = xEventGroupCreate();
 MQTTRemote _mqtt_remote(mqtt_client_id, mqtt_host, 1883, mqtt_username, mqtt_password,
                         MQTTRemote::Configuration{.rx_buffer_size = 2048, .tx_buffer_size = 2048, .keep_alive_s = 10});
 
@@ -36,11 +36,11 @@ void mqttMessageTask(void *pvParameters) {
 void mqttConnectionStateChangedTask(void *pvParameters) {
   while (1) {
     // Waiting forever for a change.
-    auto bits = xEventGroupWaitBits(_conntect_state_changed_event_group,
+    auto bits = xEventGroupWaitBits(_connection_state_changed_event_group,
                                     MQTTRemote::ConnectionState::Connected | MQTTRemote::ConnectionState::Disconnected,
                                     pdTRUE, pdFALSE, portMAX_DELAY);
     auto connected = (bits & MQTTRemote::ConnectionState::Connected) != 0;
-    auto disconnected = (bits & MQTTRemote::ConnectionState::Connected) != 0;
+    auto disconnected = (bits & MQTTRemote::ConnectionState::Disconnected) != 0;
 
     if (connected) {
       ESP_LOGI(TAG, "MQTT Connected");
@@ -76,7 +76,7 @@ void app_main(void) {
     });
 
     // Start MQTT
-    _mqtt_remote.start(_conntect_state_changed_event_group);
+    _mqtt_remote.start(_connection_state_changed_event_group);
 
     // Start task for periodically publishing messages.
     xTaskCreate(mqttMessageTask, "mqttMessageTask", 2048, NULL, 15, NULL);
