@@ -24,6 +24,7 @@ jobs:
         example:
           - name: publish_and_subscribe
           - name: publish_and_subscribe_event_group
+          - name: tls_letsencrypt
 
     steps:
       - name: Checkout repo

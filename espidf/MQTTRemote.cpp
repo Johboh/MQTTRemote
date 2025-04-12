@@ -1,4 +1,5 @@
 #include "MQTTRemote.h"
+#include <algorithm>
 #include <esp_err.h>
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
@@ -92,9 +93,38 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
     : _client_id(client_id), _last_will_topic(_client_id + "/status") {
 
   esp_mqtt_client_config_t mqtt_cfg = {};
+
+  esp_mqtt_transport_t transport = MQTT_TRANSPORT_OVER_TCP;
+  if (configuration.transport) {
+    transport = *configuration.transport;
+  } else {
+    // try to deduce from schema.
+    std::transform(host.begin(), host.end(), host.begin(), ::tolower);
+    if (host.rfind("mqtt://", 0) == 0) {
+      transport = MQTT_TRANSPORT_OVER_TCP;
+      host = host.substr(7);
+    } else if (host.rfind("mqtts://", 0) == 0) {
+      transport = MQTT_TRANSPORT_OVER_SSL;
+      host = host.substr(8);
+    } else if (host.rfind("ws://", 0) == 0) {
+      transport = MQTT_TRANSPORT_OVER_WS;
+      host = host.substr(5);
+    } else if (host.rfind("wss://", 0) == 0) {
+      transport = MQTT_TRANSPORT_OVER_WSS;
+      host = host.substr(6);
+    }
+  }
+
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
   mqtt_cfg.broker.address.hostname = host.c_str();
-  mqtt_cfg.broker.address.transport = MQTT_TRANSPORT_OVER_TCP; // TODO: Support TLS
+  mqtt_cfg.broker.address.transport = transport;
+  if (transport == MQTT_TRANSPORT_OVER_SSL || transport == MQTT_TRANSPORT_OVER_WSS) {
+    memcpy(&mqtt_cfg.broker.verification, &configuration.verification, sizeof(configuration.verification));
+    ESP_LOGI(MQTTRemoteLog::TAG, "Using TLS verification");
+    ESP_LOGI(MQTTRemoteLog::TAG, " -- use_global_ca_store: %d", mqtt_cfg.broker.verification.use_global_ca_store);
+    ESP_LOGI(MQTTRemoteLog::TAG, " -- skip_cert_common_name_check: %d",
+             mqtt_cfg.broker.verification.skip_cert_common_name_check);
+  }
   mqtt_cfg.broker.address.port = port;
 
   mqtt_cfg.buffer.size = configuration.rx_buffer_size;
@@ -120,7 +150,14 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   }
 #else
   mqtt_cfg.host = host.c_str();
-  mqtt_cfg.transport = MQTT_TRANSPORT_OVER_TCP; // TODO: Support TLS
+  mqtt_cfg.transport = transport;
+  if (transport == MQTT_TRANSPORT_OVER_SSL || transport == MQTT_TRANSPORT_OVER_WSS) {
+    memcpy(&mqtt_cfg.verification, &configuration.verification, sizeof(configuration.verification));
+    ESP_LOGI(MQTTRemoteLog::TAG, "Using TLS verification");
+    ESP_LOGI(MQTTRemoteLog::TAG, " -- use_global_ca_store: %d", mqtt_cfg.verification.use_global_ca_store);
+    ESP_LOGI(MQTTRemoteLog::TAG, " -- skip_cert_common_name_check: %d",
+             mqtt_cfg.verification.skip_cert_common_name_check);
+  }
   mqtt_cfg.port = port;
 
   mqtt_cfg.buffer_size = configuration.rx_buffer_size;

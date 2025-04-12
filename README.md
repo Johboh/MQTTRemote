@@ -52,3 +52,19 @@ Newer version most probably work too, but they have not been verified.
 
 ### Dependencies
 - For Arduino ESP8266 only: https://github.com/256dpi/arduino-mqtt @^2.5.1
+
+## Websockets
+To use websockets, you need to build ESP-IDF with `MQTT_TRANSPORT_WEBSOCKET` (default enabled) and optionally `MQTT_TRANSPORT_WEBSOCKET_SECURE` set (default enabled).
+
+## TLS
+ESP-IDF must be built with `MQTT_TRANSPORT_SSL` set (default enabled). If using TLS over websockets, `MQTT_TRANSPORT_WEBSOCKET_SECURE` must be set (default enabled).
+
+To use TLS (mqtts or wss), you can either use the bundled certificates with ESP-IDF, or provide your own certificate.
+
+You can read more about this here https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/protocols/esp_crt_bundle.html
+
+To use the bundeled certificates, make sure to build with the `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE` set (default enabled). Normally, the certificates are validated and this is recommended to do, but if you use your own local certificates and do not want to bundle it, you can override this `CONFIG_ESP_TLS_INSECURE` (default disabled), but use caution.
+
+You also need to configure the `MQTTRemote::Configuration` accordingly.
+
+Also see `MQTTRemote::Configuration::verification` for examples on how to configure for self-signed certificates and check out [TLS using LetsEncrypt example](examples/espidf/tls_letsencrypt/main/main.cpp)

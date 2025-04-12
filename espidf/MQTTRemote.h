@@ -58,6 +58,60 @@ public:
      * MQTT keep alive interval, in seconds.
      */
     uint32_t keep_alive_s = 10;
+
+    /**
+     * Values, see esp_mqtt_transport_t:
+     * - MQTT_TRANSPORT_OVER_TCP = mqtt
+     * - MQTT_TRANSPORT_OVER_SSL = mqtts (TLS)
+     * - MQTT_TRANSPORT_OVER_WS = ws (websockets)
+     * - MQTT_TRANSPORT_OVER_WSS = wss (websockets with TLS)
+     *
+     * If not set, will try to decude the transport to use given the host, based on schemes `mqtt`, `mqtts`, `ws`,
+     * `wss`. If no scheme is found, will default to `mqtt`.
+     */
+    std::optional<esp_mqtt_transport_t> transport = std::nullopt;
+
+    /**
+     * If using TLS, this configures the certificate verification. Must be set if using TLS.
+     *
+     * With this, you can configure to use your own private certificate, or using the global bundle.
+     *
+     * Example to use the global bundle:
+     * ```cpp
+     *   #include <esp_rls.h>
+     *
+     *  .vertification = {
+     *    .use_global_ca_store = true,
+     *  },
+     * ```
+     *
+     * Then before calling start():
+     *
+     * ```cpp
+     *   mbedtls_ssl_config conf;
+     *   mbedtls_ssl_config_init(&conf);
+     *   esp_tls_init_global_ca_store();
+     * ```
+     * Here you have the option to use other TLS implementation like mbedtls or wolfssl.
+     *
+     *
+     * Example how to use letsencrypt (or similary for your own certificates):
+     * 1. Download the ISRG Root X1 PEM file from https://letsencrypt.org/certs/isrgrootx1.pem
+     * 2. Add in main directory
+     * 3. Add `target_add_binary_data(${COMPONENT_TARGET} "isrgrootx1.pem" TEXT)` to your CMakeLists.txt
+     *
+     * Setup verification as follows:
+     * ```cpp
+     *   extern const uint8_t isrgrootx1_pem_start[] asm("_binary_isrgrootx1_pem_start");
+     *
+     *  .vertification = {
+     *    .certificate = (const char *)isrgrootx1_pem_start,
+     *  },
+     * ```
+     *
+     * If using your own certificate, you might need to set `skip_cert_common_name_check` to true in the verification.
+     */
+    esp_mqtt_client_config_t::broker_t::verification_t verification = {};
   };
 
   /**
@@ -71,7 +125,9 @@ public:
    * topic. Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
    * is also used as client ID for the MQTT connection. This has to be [a-zA-Z0-9_] only and unique among all MQTT
    * clients on the server. It should also be stable across connections.
-   * @param host MQTT hostname or IP for MQTT server.
+   * @param host MQTT hostname or IP for MQTT server. Supports `mqtt`, `mqtts`, `ws`, `wss` schemes. For example,
+   * mqtts://hostname or just hostname/IP. If not using schemes, transport must be set in Configuration. Remember to
+   * also specify the correct port to use for your schema.
    * @param port MQTT port number.
    * @param username MQTT username.
    * @param password MQTT password.
