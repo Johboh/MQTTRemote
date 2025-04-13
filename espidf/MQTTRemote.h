@@ -39,15 +39,13 @@ public:
   // https://github.com/espressif/esp-mqtt/blob/ae53d799da294f03ef65c33e88fa33648e638134/include/mqtt_client.h#L244
   struct verification_t {
     bool use_global_ca_store = false;
-    esp_err_t (*crt_bundle_attach)(void *conf);
+    esp_err_t (*crt_bundle_attach)(void *conf) = nullptr;
     const char *certificate = nullptr;
     size_t certificate_len = 0;
     bool skip_cert_common_name_check = false;
     const struct psk_key_hint *psk_hint_key = nullptr;
     const char **alpn_protos = nullptr;
   };
-
-  verification_t verification = {};
 #endif
 
   /**
