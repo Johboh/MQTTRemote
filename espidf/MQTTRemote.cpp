@@ -115,7 +115,7 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
     }
   }
 
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
   mqtt_cfg.broker.address.hostname = host.c_str();
   mqtt_cfg.broker.address.transport = transport;
   if (transport == MQTT_TRANSPORT_OVER_SSL || transport == MQTT_TRANSPORT_OVER_WSS) {
@@ -152,11 +152,15 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.host = host.c_str();
   mqtt_cfg.transport = transport;
   if (transport == MQTT_TRANSPORT_OVER_SSL || transport == MQTT_TRANSPORT_OVER_WSS) {
-    memcpy(&mqtt_cfg.verification, &configuration.verification, sizeof(configuration.verification));
+    mqtt_cfg.use_global_ca_store = configuration.verification.use_global_ca_store;
+    mqtt_cfg.cert_pem = configuration.verification.certificate;
+    mqtt_cfg.cert_len = configuration.verification.certificate_len;
+    mqtt_cfg.skip_cert_common_name_check = configuration.verification.skip_cert_common_name_check;
+    mqtt_cfg.psk_hint_key = configuration.verification.psk_hint_key;
+    mqtt_cfg.alpn_protos = configuration.verification.alpn_protos;
     ESP_LOGI(MQTTRemoteLog::TAG, "Using TLS verification");
-    ESP_LOGI(MQTTRemoteLog::TAG, " -- use_global_ca_store: %d", mqtt_cfg.verification.use_global_ca_store);
-    ESP_LOGI(MQTTRemoteLog::TAG, " -- skip_cert_common_name_check: %d",
-             mqtt_cfg.verification.skip_cert_common_name_check);
+    ESP_LOGI(MQTTRemoteLog::TAG, " -- use_global_ca_store: %d", mqtt_cfg.use_global_ca_store);
+    ESP_LOGI(MQTTRemoteLog::TAG, " -- skip_cert_common_name_check: %d", mqtt_cfg.skip_cert_common_name_check);
   }
   mqtt_cfg.port = port;
 

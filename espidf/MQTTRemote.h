@@ -31,6 +31,25 @@ public:
     Disconnected = BIT1,
   };
 
+// ESP-IDF 4.4 backward compatibility
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+  typedef esp_mqtt_client_config_t::broker_t::verification_t verification_t;
+#else
+  // See
+  // https://github.com/espressif/esp-mqtt/blob/ae53d799da294f03ef65c33e88fa33648e638134/include/mqtt_client.h#L244
+  struct verification_t {
+    bool use_global_ca_store = false;
+    esp_err_t (*crt_bundle_attach)(void *conf);
+    const char *certificate = nullptr;
+    size_t certificate_len = 0;
+    bool skip_cert_common_name_check = false;
+    const struct psk_key_hint *psk_hint_key = nullptr;
+    const char **alpn_protos = nullptr;
+  };
+
+  verification_t verification = {};
+#endif
+
   /**
    * Additional configuration where most user can go with defaults.
    */
@@ -111,7 +130,7 @@ public:
      *
      * If using your own certificate, you might need to set `skip_cert_common_name_check` to true in the verification.
      */
-    esp_mqtt_client_config_t::broker_t::verification_t verification = {};
+    verification_t verification = {};
   };
 
   /**
