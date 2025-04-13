@@ -16,13 +16,12 @@ const char mqtt_password[] = "";
 
 extern const uint8_t isrgrootx1_pem_start[] asm("_binary_isrgrootx1_pem_start");
 
-MQTTRemote _mqtt_remote(mqtt_client_id, mqtt_host, mqtt_port, mqtt_username, mqtt_password,
-                        {.rx_buffer_size = 2048,
-                         .tx_buffer_size = 2048,
-                         .keep_alive_s = 10,
-                         .verification = {
-                             .certificate = (const char *)isrgrootx1_pem_start,
-                         }});
+MQTTRemote::Configuration::verification_t verification = {
+    .certificate = (const char *)isrgrootx1_pem_start,
+};
+MQTTRemote
+    _mqtt_remote(mqtt_client_id, mqtt_host, mqtt_port, mqtt_username, mqtt_password,
+                 {.rx_buffer_size = 2048, .tx_buffer_size = 2048, .keep_alive_s = 10, .verification = verification});
 
 void blinkAndSerialTask(void *pvParameters) {
   bool swap = false;

@@ -31,27 +31,27 @@ public:
     Disconnected = BIT1,
   };
 
-// ESP-IDF 4.4 backward compatibility
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-  typedef esp_mqtt_client_config_t::broker_t::verification_t verification_t;
-#else
-  // See
-  // https://github.com/espressif/esp-mqtt/blob/ae53d799da294f03ef65c33e88fa33648e638134/include/mqtt_client.h#L244
-  struct verification_t {
-    bool use_global_ca_store = false;
-    esp_err_t (*crt_bundle_attach)(void *conf) = nullptr;
-    const char *certificate = nullptr;
-    size_t certificate_len = 0;
-    bool skip_cert_common_name_check = false;
-    const struct psk_key_hint *psk_hint_key = nullptr;
-    const char **alpn_protos = nullptr;
-  };
-#endif
-
   /**
    * Additional configuration where most user can go with defaults.
    */
   struct Configuration {
+// ESP-IDF 4.4 backward compatibility
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    typedef esp_mqtt_client_config_t::broker_t::verification_t verification_t;
+#else
+    // See
+    // https://github.com/espressif/esp-mqtt/blob/ae53d799da294f03ef65c33e88fa33648e638134/include/mqtt_client.h#L244
+    struct verification_t {
+      bool use_global_ca_store = false;
+      esp_err_t (*crt_bundle_attach)(void *conf) = nullptr;
+      const char *certificate = nullptr;
+      size_t certificate_len = 0;
+      bool skip_cert_common_name_check = false;
+      const struct psk_key_hint *psk_hint_key = nullptr;
+      const char **alpn_protos = nullptr;
+    };
+#endif
+
     /**
      * Maximum message size, in bytes, for incoming messages. Messages larger than this will be truncated.
      * This will be allocated on the heap upon MQTTRemote object creation.
