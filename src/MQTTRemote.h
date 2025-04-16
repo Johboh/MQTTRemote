@@ -32,7 +32,8 @@ public:
     uint32_t buffer_size = 1024;
 
     /**
-     * MQTT keep alive interval, in seconds.
+     * MQTT keep alive interval, in seconds. If the client fails to communicate with the broker within the specified
+     * Keep Alive period, the LWT/Last Will message is sent (by the broker).
      */
     uint32_t keep_alive_s = 10;
 
