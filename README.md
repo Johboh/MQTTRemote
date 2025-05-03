@@ -1,7 +1,7 @@
 # MQTTRemote
 [![PlatformIO CI](https://github.com/Johboh/MQTTRemote/actions/workflows/platformio.yaml/badge.svg)](https://registry.platformio.org/libraries/johboh/MQTTRemote)
 [![ESP-IDF CI](https://github.com/Johboh/MQTTRemote/actions/workflows/espidf.yaml/badge.svg)](https://components.espressif.com/components/johboh/mqttremote)
-[![Arduino IDE](https://github.com/Johboh/MQTTRemote/actions/workflows/arduino_cli.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote/actions/workflows/arduino_cli.yaml)
+[![Arduino IDE](https://github.com/Johboh/MQTTRemote/actions/workflows/arduino_cli.yaml/badge.svg)](https://downloads.arduino.cc/libraries/logs/github.com/Johboh/MQTTRemote/)
 [![GitHub release](https://img.shields.io/github/release/Johboh/MQTTRemote.svg)](https://github.com/Johboh/MQTTRemote/releases)
 [![Clang-format](https://github.com/Johboh/MQTTRemote/actions/workflows/clang-format.yaml/badge.svg)](https://github.com/Johboh/MQTTRemote)
 
