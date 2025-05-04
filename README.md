@@ -14,12 +14,12 @@ On connection, it publish `online` to the `client-id/status` topic, and sets up 
 
 ### Installation
 #### PlatformIO ESP32 (Arduino or ESP-IDF):
-Add the following to `libs_deps`:
+Add the following to `lib_deps`:
 ```
    Johboh/MQTTRemote
 ```
 #### PlatformIO ESP8266 (Arduino only):
-Add the following to `libs_deps`:
+Add the following to `lib_deps`:
 ```
    Johboh/MQTTRemote8266
 ```
