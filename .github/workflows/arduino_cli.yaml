@@ -10,12 +10,12 @@ jobs:
             test: publish_and_subscribe
             core: "esp32:esp32@3.0.2"
             fqbn: "esp32:esp32:esp32"
-            additional_libraries: []
+            additional_libraries: ""
           - name: samd
             test: publish_and_subscribe_mkr
             core: "arduino:samd"
             fqbn: "arduino:samd:mkrwifi1010"
-            additional_libraries: ["WiFi101"]
+            additional_libraries: "WiFi101"
 
     steps:
       - name: Checkout repo
@@ -31,14 +31,7 @@ jobs:
           arduino-cli config set library.enable_unsafe_install true
           arduino-cli core update-index
           arduino-cli core install ${{ matrix.target.core }}
-          arduino-cli lib install MQTT@2.5.1
-
-      - name: Install additional libraries
-        if: ${{ matrix.target.additional_libraries != '' }}
-        run: |
-          for lib in "${{ join(matrix.target.additional_libraries, '" "') }}"; do
-            arduino-cli lib install "$lib"
-          done
+          arduino-cli lib install MQTT@2.5.1 ${{ matrix.target.additional_libraries }}
 
       - name: Install repo as library
         run: |
