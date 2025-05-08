@@ -32,11 +32,13 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install ${{ matrix.target.core }}
           arduino-cli lib install MQTT@2.5.1
-          if [ -n "${{ matrix.target.additional_libraries }}" ]; then
-            for lib in ${{ matrix.target.additional_libraries }}; do
-              arduino-cli lib install "$lib"
-            done
-          fi
+
+      - name: Install additional libraries
+        if: ${{ matrix.target.additional_libraries != '' }}
+        run: |
+          for lib in "${{ join(matrix.target.additional_libraries, '" "') }}"; do
+            arduino-cli lib install "$lib"
+          done
 
       - name: Install repo as library
         run: |
