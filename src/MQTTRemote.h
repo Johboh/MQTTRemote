@@ -2,7 +2,6 @@
 #define __MQTT_REMOTE_H__
 
 #include "IMQTTRemote.h"
-
 #include <MQTT.h>
 #include <functional>
 #include <map>
@@ -11,6 +10,8 @@
 #include <WiFi.h>
 #elif ESP8266
 #include <ESP8266WiFi.h>
+#elif defined(ARDUINO_SAMD_MKRWIFI1010)
+#include <WiFi101.h>
 #else
 #error "Unsupported hardware. Sorry!"
 #endif
