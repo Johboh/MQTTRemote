@@ -15,8 +15,7 @@ jobs:
             test: publish_and_subscribe_mkr
             core: "arduino:samd"
             fqbn: "arduino:samd:mkrwifi1010"
-            additional_libraries:
-              - "WiFi101"
+            additional_libraries: ["WiFi101"]
 
     steps:
       - name: Checkout repo
@@ -33,8 +32,8 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install ${{ matrix.target.core }}
           arduino-cli lib install MQTT@2.5.1
-          if [ ! -z "${{ matrix.target.additional_libraries }}" ]; then
-            for lib in ${{ toJson(matrix.target.additional_libraries) }}; do
+          if [ -n "${{ matrix.target.additional_libraries }}" ]; then
+            for lib in ${{ matrix.target.additional_libraries }}; do
               arduino-cli lib install "$lib"
             done
           fi
