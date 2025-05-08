@@ -14,7 +14,7 @@
       "url": "https://github.com/Johboh/MQTTRemote.git"
     },
     "frameworks": "arduino",
-    "platforms": ["espressif8266"],
+    "platforms": ["espressif8266", "samd"],
     "examples": [
       {
           "name": "Publish and subscribe",
