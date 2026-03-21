@@ -18,7 +18,7 @@ extern const uint8_t isrgrootx1_pem_start[] asm("_binary_isrgrootx1_pem_start");
 extern const uint8_t isrgrootx1_pem_end[] asm("_binary_isrgrootx1_pem_end");
 const size_t certificate_len = isrgrootx1_pem_end - isrgrootx1_pem_start;
 
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(6, 0, 0)
 esp_mqtt_client_config_t::broker_t::verification_t verification = {
     .use_global_ca_store = false,
     .crt_bundle_attach = nullptr,
@@ -28,16 +28,12 @@ esp_mqtt_client_config_t::broker_t::verification_t verification = {
     .skip_cert_common_name_check = false,
     .alpn_protos = nullptr,
     .common_name = nullptr,
+    .ciphersuites_list = nullptr,
 };
 #else
 esp_mqtt_client_config_t::broker_t::verification_t verification = {
-    .use_global_ca_store = false,
-    .crt_bundle_attach = nullptr,
     .certificate = (const char *)isrgrootx1_pem_start,
     .certificate_len = certificate_len,
-    .psk_hint_key = nullptr,
-    .skip_cert_common_name_check = false,
-    .alpn_protos = nullptr,
 };
 #endif
 
