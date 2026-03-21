@@ -3,3 +3,4 @@ description: MQTT wrapper for setting up an MQTT connection
 url: https://github.com/Johboh/MQTTRemote
 dependencies:
   idf: ">=4.4.3"
+  espressif/mqtt: ">=1.0.0"
