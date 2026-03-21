@@ -19,7 +19,7 @@ jobs:
             example_root: examples/arduino/legacy_stack/
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - uses: actions/cache@v3
         with:
           path: |
