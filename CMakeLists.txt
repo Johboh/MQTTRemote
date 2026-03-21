@@ -9,7 +9,7 @@ endif()
 idf_component_register(COMPONENT_NAME "MQTTRemote"
                         SRCS ${lib_sources}
                         INCLUDE_DIRS "./espidf/"
-                        REQUIRES esp_event)
+                        REQUIRES ${MQTT_COMPONENT} esp_event)
 
 
 if(IDF_VERSION_MAJOR LESS 5) # 5+ compiles with c++23, 6+ compiles with c++26.
