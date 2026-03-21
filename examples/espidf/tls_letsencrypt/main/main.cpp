@@ -15,23 +15,22 @@ const char mqtt_password[] = "";
 #define PIN_LED GPIO_NUM_14
 
 extern const uint8_t isrgrootx1_pem_start[] asm("_binary_isrgrootx1_pem_start");
+extern const uint8_t isrgrootx1_pem_end[] asm("_binary_isrgrootx1_pem_end");
+const size_t certificate_len = isrgrootx1_pem_end - isrgrootx1_pem_start;
 
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 MQTTRemote::Configuration configuration = {.rx_buffer_size = 2048,
                                            .tx_buffer_size = 2048,
                                            .keep_alive_s = 10,
                                            .verification = {
+                                               .use_global_ca_store = false,
+                                               .crt_bundle_attach = nullptr,
                                                .certificate = (const char *)isrgrootx1_pem_start,
+                                               .certificate_len = certificate_len,
+                                               .psk_hint_key = nullptr,
+                                               .skip_cert_common_name_check = false,
+                                               .alpn_protos = nullptr,
+                                               .common_name = nullptr,
                                            }};
-#else
-MQTTRemote::Configuration configuration = {.rx_buffer_size = 2048,
-                                           .tx_buffer_size = 2048,
-                                           .keep_alive_s = 10,
-                                           .transport = MQTT_TRANSPORT_OVER_SSL,
-                                           .verification = {
-                                               .certificate = (const char *)isrgrootx1_pem_start,
-                                           }};
-#endif
 MQTTRemote _mqtt_remote(mqtt_client_id, mqtt_host, mqtt_port, mqtt_username, mqtt_password, configuration);
 
 void blinkAndSerialTask(void *pvParameters) {
