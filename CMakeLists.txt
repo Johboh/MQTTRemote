@@ -1,5 +1,11 @@
 FILE(GLOB_RECURSE lib_sources "./espidf/*.*")
 
+if(IDF_VERSION_MAJOR GREATER_EQUAL 6)
+    set(MQTT_COMPONENT "") # Moved to component manager
+else()
+    set(MQTT_COMPONENT "mqtt")
+endif()
+
 idf_component_register(COMPONENT_NAME "MQTTRemote"
                         SRCS ${lib_sources}
                         INCLUDE_DIRS "./espidf/"
