@@ -26,7 +26,7 @@ void MQTTRemote::handle() {
       Serial.println("success!");
 
       // And publish that we are now online.
-      publishMessageVerbose(_client_id + "/status", "online", true);
+      publishMessageVerbose(_client_id + "/status", "online", true, 1);
 
       // Subscribe to all topics.
       for (const auto &subscription : _subscriptions) {
@@ -106,4 +106,4 @@ void MQTTRemote::onMessage(MQTTClient *client, char topic_cstr[], char message_c
   }
 }
 
-void MQTTRemote::setupWill() { _mqtt_client.setWill(std::string(_client_id + "/status").c_str(), "offline", true, 0); }
+void MQTTRemote::setupWill() { _mqtt_client.setWill(std::string(_client_id + "/status").c_str(), "offline", true, 1); }

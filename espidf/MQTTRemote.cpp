@@ -142,8 +142,8 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
 
   mqtt_cfg.session.last_will.topic = _last_will_topic.c_str();
   mqtt_cfg.session.last_will.msg = LAST_WILL_MSG;
-  mqtt_cfg.session.last_will.qos = 0;
-  mqtt_cfg.session.last_will.retain = 0;
+  mqtt_cfg.session.last_will.qos = 1;
+  mqtt_cfg.session.last_will.retain = 1;
 
   if (configuration.task_size) {
     mqtt_cfg.task.stack_size = *configuration.task_size;
@@ -180,8 +180,8 @@ MQTTRemote::MQTTRemote(std::string client_id, std::string host, int port, std::s
   mqtt_cfg.lwt_topic = _last_will_topic.c_str();
   mqtt_cfg.lwt_msg = LAST_WILL_MSG;
   mqtt_cfg.lwt_msg_len = sizeof(LAST_WILL_MSG) - 1;
-  mqtt_cfg.lwt_qos = 0;
-  mqtt_cfg.lwt_retain = 0;
+  mqtt_cfg.lwt_qos = 1;
+  mqtt_cfg.lwt_retain = 1;
 
   if (configuration.task_size) {
     mqtt_cfg.task_stack = *configuration.task_size;
