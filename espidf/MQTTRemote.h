@@ -3,11 +3,13 @@
 
 #include "IMQTTRemote.h"
 
+#include <atomic>
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
 #include <functional>
 #include <map>
 #include <mqtt_client.h>
+#include <mutex>
 #include <optional>
 #include <string>
 
@@ -53,7 +55,8 @@ public:
 #endif
 
     /**
-     * Maximum message size, in bytes, for incoming messages. Messages larger than this will be truncated.
+     * Maximum message size, in bytes, for incoming messages (topic and payload share this buffer). Messages larger
+     * than this will be dropped (and a warning logged) rather than delivered partially to the subscription callback.
      * This will be allocated on the heap upon MQTTRemote object creation.
      */
     uint32_t rx_buffer_size = 1024;
@@ -84,7 +87,7 @@ public:
      * - MQTT_TRANSPORT_OVER_WS = ws (websockets)
      * - MQTT_TRANSPORT_OVER_WSS = wss (websockets with TLS)
      *
-     * If not set, will try to decude the transport to use given the host, based on schemes `mqtt`, `mqtts`, `ws`,
+     * If not set, will try to deduce the transport to use given the host, based on schemes `mqtt`, `mqtts`, `ws`,
      * `wss`. If no scheme is found, will default to `mqtt`.
      */
     std::optional<esp_mqtt_transport_t> transport = std::nullopt;
@@ -96,9 +99,9 @@ public:
      *
      * Example to use the global bundle:
      * ```cpp
-     *   #include <esp_rls.h>
+     *   #include <esp_tls.h>
      *
-     *  .vertification = {
+     *  .verification = {
      *    .use_global_ca_store = true,
      *  },
      * ```
@@ -122,7 +125,7 @@ public:
      * ```cpp
      *   extern const uint8_t isrgrootx1_pem_start[] asm("_binary_isrgrootx1_pem_start");
      *
-     *  .vertification = {
+     *  .verification = {
      *    .certificate = (const char *)isrgrootx1_pem_start,
      *  },
      * ```
@@ -137,7 +140,7 @@ public:
    *
    * To set log level for this object, use: esp_log_level_set(MQTTRemoteLog::TAG, ESP_LOG_*);
    *
-   * A call to start() most follow.
+   * A call to start() must follow.
    *
    * @param client_id Base ID for this device. This is used for the last will / status
    * topic. Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
@@ -159,7 +162,7 @@ public:
    *
    * To set log level for this object, use: esp_log_level_set(MQTTRemoteLog::TAG, ESP_LOG_*);
    *
-   * A call to start() most follow.
+   * A call to start() must follow.
    *
    * @param client_id Base ID for this device. This is used for the last will / status
    * topic. Example, if this is "esp_now_router", then the status/last will topic will be "esp_now_router/status". This
@@ -178,9 +181,10 @@ public:
    * @brief Call once there is a WIFI connection on which the host can be reached.
    * Will connect to the server and setup any subscriptions as well as start the MQTT loop.
    * @param on_connection_change optional callback on connection state change. Will be called when the client is
-   * connected to server (every time, so expect calls on reconnection), and on disconnect. The parameter will be true on
-   * new connection and false on disconnection. This callback will run from a dedicated task. Task size and priority can
-   * be set.
+   * connected to server (every time, so expect calls on reconnection), and on disconnect. The parameter is the current
+   * connection state: true when connected and false when disconnected. If the state changes multiple times in quick
+   * succession, the callback might only be called once with the latest state. This callback will run from a dedicated
+   * task. Task size and priority can be set.
    * @param task_size the stack size for the task that will call the on_connection_change callback, if set.
    * @param task_priority the priority for the task that will call the on_connection_change callback, if set.
    *
@@ -193,9 +197,10 @@ public:
   /**
    * @brief Call once there is a WIFI connection on which the host can be reached.
    * Will connect to the server and setup any subscriptions as well as start the MQTT loop.
-   * @param connection_state_changed_event_group optional event group for connection state change. Will be be set with
-   * ConnectionState::Connected when the client is connected to server (every time, so expect re-setting on
-   * reconnection), and ConnectionState::Disconnected on disconnect.
+   * @param connection_state_changed_event_group optional event group for connection state change (can be nullptr). Will
+   * be set with ConnectionState::Connected when the client is connected to server (every time, so expect re-setting on
+   * reconnection), and ConnectionState::Disconnected on disconnect. When one of the bits is set, the other one is
+   * cleared. Only these two bits are modified by MQTTRemote, so the event group can be shared with other bits.
    *
    * NOTE: Can only be called once WIFI has been setup! ESP-IDF will assert otherwise.
    */
@@ -233,7 +238,7 @@ public:
    *
    * @param message_callback a message callback with the topic and the message. The topic is repeated for convenience,
    * but it will always be for the subscribed topic.
-   * @return true if a subcription was successful. Will return false if there is no active MQTT connection. In this
+   * @return true if a subscription was successful. Will return false if there is no active MQTT connection. In this
    * case, the subscription will be performed once connected. Will return false if this subscription is already
    * subscribed to.
    */
@@ -254,6 +259,16 @@ public:
 private:
   void startInternal();
 
+  /**
+   * @brief Set the given ConnectionState bit in the event group (if any) and clear the other one.
+   */
+  void setConnectionState(ConnectionState state);
+
+  /**
+   * @brief Dispatch an incoming (complete) message to the subscription callback, if any.
+   */
+  void onMessage(const std::string &topic, const std::string &message);
+
   /*
    * @brief Event handler registered to receive MQTT events
    *
@@ -271,11 +286,14 @@ private:
 private:
   bool _started = false;
   std::string _client_id;
-  bool _connected = false;
+  std::atomic<bool> _connected = false;
   std::string _last_will_topic;
-  esp_mqtt_client_handle_t _mqtt_client;
+  esp_mqtt_client_handle_t _mqtt_client = nullptr;
   std::function<void(bool)> _on_connection_change;
-  EventGroupHandle_t _connection_state_changed_event_group;
+  EventGroupHandle_t _connection_state_changed_event_group = nullptr;
+  // Guards _subscriptions, as well as transitions of _connected so that a subscription is never lost or sent twice
+  // when racing with a (re)connect.
+  std::mutex _subscriptions_mutex;
   std::map<std::string, SubscriptionCallback> _subscriptions;
 };
 

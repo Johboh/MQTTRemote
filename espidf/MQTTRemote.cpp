@@ -1,13 +1,23 @@
 #include "MQTTRemote.h"
 #include <algorithm>
+#include <cstring>
 #include <esp_err.h>
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <vector>
 
 #define RETRY_CONNECT_WAIT_MS 3000
 
 #define LAST_WILL_MSG "offline"
+
+static int subscribeTopic(esp_mqtt_client_handle_t client, const std::string &topic) {
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
+  return esp_mqtt_client_subscribe_single(client, topic.c_str(), 0);
+#else
+  return esp_mqtt_client_subscribe(client, topic.c_str(), 0);
+#endif
+}
 
 void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {
   MQTTRemote *_this = static_cast<MQTTRemote *>(handler_args);
@@ -15,33 +25,53 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
   esp_mqtt_client_handle_t client = event->client;
 
   switch ((esp_mqtt_event_id_t)event_id) {
-  case MQTT_EVENT_CONNECTED:
+  case MQTT_EVENT_CONNECTED: {
     ESP_LOGI(MQTTRemoteLog::TAG, "Connected!");
-    _this->_connected = true;
-    xEventGroupSetBits(_this->_connection_state_changed_event_group, ConnectionState::Connected);
+
+    // Mark as connected and take a snapshot of the subscriptions under the same lock. Any subscribe() call that
+    // happens after this will see that we are connected and subscribe by itself, and any call that happened before
+    // is part of the snapshot. This way no subscription is lost or sent twice.
+    std::vector<std::string> topics;
+    {
+      std::lock_guard<std::mutex> lock(_this->_subscriptions_mutex);
+      _this->_connected = true;
+      topics.reserve(_this->_subscriptions.size());
+      for (const auto &subscription : _this->_subscriptions) {
+        topics.push_back(subscription.first);
+      }
+    }
 
     // And publish that we are now online.
     _this->publishMessageVerbose(_this->_last_will_topic, "online", true);
 
     // Subscribe to all topics.
-    for (const auto &subscription : _this->_subscriptions) {
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
-      esp_mqtt_client_subscribe_single(client, subscription.first.c_str(), 0);
-#else
-      esp_mqtt_client_subscribe(client, subscription.first.c_str(), 0);
-#endif
+    for (const auto &topic : topics) {
+      subscribeTopic(client, topic);
     }
 
+    // Notify last, so that any listener sees a fully set up connection.
+    _this->setConnectionState(ConnectionState::Connected);
     break;
+  }
 
-  case MQTT_EVENT_DISCONNECTED:
+  case MQTT_EVENT_DISCONNECTED: {
     ESP_LOGW(MQTTRemoteLog::TAG, "Disconnected.");
-    _this->_connected = false;
-    xEventGroupSetBits(_this->_connection_state_changed_event_group, ConnectionState::Disconnected);
+    {
+      std::lock_guard<std::mutex> lock(_this->_subscriptions_mutex);
+      _this->_connected = false;
+    }
+    _this->setConnectionState(ConnectionState::Disconnected);
     break;
+  }
 
   case MQTT_EVENT_ERROR:
-    ESP_LOGE(MQTTRemoteLog::TAG, "MQTT_EVENT_ERROR: %s", strerror(event->error_handle->esp_transport_sock_errno));
+    if (event->error_handle->error_type == MQTT_ERROR_TYPE_CONNECTION_REFUSED) {
+      ESP_LOGE(MQTTRemoteLog::TAG, "MQTT_EVENT_ERROR: Connection refused by broker, return code: %d",
+               (int)event->error_handle->connect_return_code);
+    } else {
+      ESP_LOGE(MQTTRemoteLog::TAG, "MQTT_EVENT_ERROR: type: %d, errno: %d (%s)", (int)event->error_handle->error_type,
+               event->error_handle->esp_transport_sock_errno, strerror(event->error_handle->esp_transport_sock_errno));
+    }
     break;
 
   case MQTT_EVENT_SUBSCRIBED:
@@ -57,15 +87,23 @@ void MQTTRemote::onMqttEvent(void *handler_args, esp_event_base_t base, int32_t 
     break;
 
   case MQTT_EVENT_DATA: {
+    if (event->current_data_offset > 0) {
+      // Continuation of a fragmented message that was already dropped below.
+      ESP_LOGV(MQTTRemoteLog::TAG, "Ignoring fragment at offset %d", event->current_data_offset);
+      break;
+    }
+    if (event->data_len < event->total_data_len) {
+      // Message did not fit in the RX buffer and will arrive in multiple fragments. Drop it instead of delivering a
+      // truncated message to the subscriber.
+      ESP_LOGW(MQTTRemoteLog::TAG,
+               "Dropping message on topic %.*s: payload size %d does not fit in RX buffer. Increase rx_buffer_size.",
+               event->topic_len, event->topic, event->total_data_len);
+      break;
+    }
     std::string topic = std::string(event->topic, event->topic_len);
     std::string msg = std::string(event->data, event->data_len);
     ESP_LOGV(MQTTRemoteLog::TAG, "Received message with topic %s and payload size %d", topic.c_str(), event->data_len);
-    if (auto subscription = _this->_subscriptions.find(topic); subscription != _this->_subscriptions.end()) {
-      ESP_LOGV(MQTTRemoteLog::TAG, "callback found");
-      subscription->second(topic, msg);
-    } else {
-      ESP_LOGV(MQTTRemoteLog::TAG, "NO callback found");
-    }
+    _this->onMessage(topic, msg);
     break;
   }
 
@@ -219,25 +257,37 @@ void MQTTRemote::start(EventGroupHandle_t connection_state_changed_event_group) 
 }
 
 void MQTTRemote::startInternal() {
-  xEventGroupClearBits(_connection_state_changed_event_group, 0xFF);
+  if (_connection_state_changed_event_group != nullptr) {
+    // Only clear our own bits, the event group might be shared with the user.
+    xEventGroupClearBits(_connection_state_changed_event_group,
+                         ConnectionState::Connected | ConnectionState::Disconnected);
+  }
   ESP_ERROR_CHECK(esp_mqtt_client_register_event(_mqtt_client, MQTT_EVENT_ANY, onMqttEvent, this));
   ESP_ERROR_CHECK(esp_mqtt_client_start(_mqtt_client));
 
   _started = true;
 }
 
+void MQTTRemote::setConnectionState(ConnectionState state) {
+  if (_connection_state_changed_event_group == nullptr) {
+    return;
+  }
+  // Only touch our own bits, the event group might be shared with the user.
+  const EventBits_t other =
+      state == ConnectionState::Connected ? ConnectionState::Disconnected : ConnectionState::Connected;
+  xEventGroupClearBits(_connection_state_changed_event_group, other);
+  xEventGroupSetBits(_connection_state_changed_event_group, state);
+}
+
 void MQTTRemote::runTask(void *pvParams) {
   MQTTRemote *_this = static_cast<MQTTRemote *>(pvParams);
   while (1) {
-    auto event_bits =
-        xEventGroupWaitBits(_this->_connection_state_changed_event_group,
-                            MQTTRemote::ConnectionState::Connected | MQTTRemote::ConnectionState::Disconnected, pdTRUE,
-                            pdFALSE, portMAX_DELAY);
-    if ((event_bits & MQTTRemote::ConnectionState::Connected) != 0) {
-      _this->_on_connection_change(true);
-    } else if ((event_bits & MQTTRemote::ConnectionState::Disconnected) != 0) {
-      _this->_on_connection_change(false);
-    }
+    xEventGroupWaitBits(_this->_connection_state_changed_event_group,
+                        MQTTRemote::ConnectionState::Connected | MQTTRemote::ConnectionState::Disconnected, pdTRUE,
+                        pdFALSE, portMAX_DELAY);
+    // Report the actual current state rather than which bit was set. If the state changed multiple times since we
+    // last woke up, this guarantees that the latest state is the one reported.
+    _this->_on_connection_change(_this->_connected);
   }
 }
 
@@ -262,26 +312,49 @@ bool MQTTRemote::publishMessageVerbose(std::string topic, std::string message, b
 }
 
 bool MQTTRemote::subscribe(std::string topic, IMQTTRemote::SubscriptionCallback message_callback) {
-  if (_subscriptions.count(topic) > 0) {
-    ESP_LOGW(MQTTRemoteLog::TAG, "Topic %s is already subscribed to.", topic.c_str());
-    return false;
+  bool connected;
+  {
+    // Check connection state under the same lock as the MQTT_EVENT_CONNECTED handler, see comment there.
+    std::lock_guard<std::mutex> lock(_subscriptions_mutex);
+    if (_subscriptions.count(topic) > 0) {
+      ESP_LOGW(MQTTRemoteLog::TAG, "Topic %s is already subscribed to.", topic.c_str());
+      return false;
+    }
+    _subscriptions.emplace(topic, std::move(message_callback));
+    connected = _connected;
   }
 
-  _subscriptions.emplace(topic, message_callback);
-
-  if (!connected()) {
+  if (!connected) {
     ESP_LOGI(MQTTRemoteLog::TAG, "Not connected. Will subscribe once connected.");
     return false;
   }
 
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
-  return esp_mqtt_client_subscribe_single(_mqtt_client, topic.c_str(), 0) >= 0;
-#else
-  return esp_mqtt_client_subscribe(_mqtt_client, topic.c_str(), 0) >= 0;
-#endif
+  return subscribeTopic(_mqtt_client, topic) >= 0;
 }
 
 bool MQTTRemote::unsubscribe(std::string topic) {
-  _subscriptions.erase(topic);
+  {
+    std::lock_guard<std::mutex> lock(_subscriptions_mutex);
+    _subscriptions.erase(topic);
+  }
   return esp_mqtt_client_unsubscribe(_mqtt_client, topic.c_str()) >= 0;
+}
+
+void MQTTRemote::onMessage(const std::string &topic, const std::string &message) {
+  // Copy the callback while holding the lock, then invoke it without the lock. This allows the callback to safely call
+  // subscribe()/unsubscribe() (even on its own topic) without deadlocking or destroying itself while running.
+  SubscriptionCallback callback;
+  {
+    std::lock_guard<std::mutex> lock(_subscriptions_mutex);
+    if (auto subscription = _subscriptions.find(topic); subscription != _subscriptions.end()) {
+      callback = subscription->second;
+    }
+  }
+
+  if (callback) {
+    ESP_LOGV(MQTTRemoteLog::TAG, "callback found");
+    callback(topic, message);
+  } else {
+    ESP_LOGV(MQTTRemoteLog::TAG, "NO callback found");
+  }
 }

@@ -35,14 +35,14 @@ void setup() {
   Serial.print("IP number: ");
   Serial.println(WiFi.localIP());
 
+  // Subscribe before starting. Subscriptions are (re-)subscribed to automatically on every (re)connection.
+  _mqtt_remote.subscribe(_mqtt_remote.clientId() + "/interesting/topic", [](std::string topic, std::string message) {
+    Serial.println(("Got message [" + message + "] on topic: " + topic).c_str());
+  });
+
   _mqtt_remote.start([](bool connected) {
     if (connected) {
-      _mqtt_remote.subscribe(
-          _mqtt_remote.clientId() + "/interesting/topic", [](std::string topic, std::string message) {
-            Serial.println(("Got message [" + message + "] on topic: " + topic).c_str());
-
-            _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/initial_message", "oh hello!");
-          });
+      _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/initial_message", "oh hello!");
     }
   });
 }

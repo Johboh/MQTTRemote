@@ -57,7 +57,9 @@ void app_main(void) {
 
     // Start MQTT
     _mqtt_remote.start([](bool connected) {
-      _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/initial_message", "oh hello!");
+      if (connected) {
+        _mqtt_remote.publishMessageVerbose(_mqtt_remote.clientId() + "/initial_message", "oh hello!");
+      }
     });
 
     // Start task for periodically publishing messages.

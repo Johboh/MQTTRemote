@@ -95,7 +95,8 @@ void MQTTRemote::onMessage(MQTTClient *client, char topic_cstr[], char message_c
     if (_receive_verbose) {
       Serial.print(" (callback found) ");
     }
-    subscription->second(topic_cstr, message_cstr);
+    // Use message_size explicitly, so binary payloads (or payloads containing '\0') are not truncated.
+    subscription->second(topic, std::string(message_cstr, message_size));
   } else {
     if (_receive_verbose) {
       Serial.print(" (NO callback found) ");
