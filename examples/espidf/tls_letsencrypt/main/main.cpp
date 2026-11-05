@@ -1,3 +1,6 @@
+// Copyright (c) Johan Böhlin
+// SPDX-License-Identifier: MIT
+
 #include <MQTTRemote.h>
 #include <driver/gpio.h>
 #include <esp_log.h>

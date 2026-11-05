@@ -1,3 +1,6 @@
+// Copyright (c) Johan Böhlin
+// SPDX-License-Identifier: MIT
+
 #include "MQTTRemote.h"
 
 #define RETRY_CONNECT_WAIT_MS 3000

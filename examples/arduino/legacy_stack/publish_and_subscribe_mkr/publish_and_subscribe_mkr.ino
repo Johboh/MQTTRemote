@@ -1,3 +1,6 @@
+// Copyright (c) Johan Böhlin
+// SPDX-License-Identifier: MIT
+
 #include <Arduino.h>
 #include <MQTTRemote.h>
 #include <WiFi101.h>

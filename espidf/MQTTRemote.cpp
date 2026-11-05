@@ -1,3 +1,6 @@
+// Copyright (c) Johan Böhlin
+// SPDX-License-Identifier: MIT
+
 #include "MQTTRemote.h"
 #include <algorithm>
 #include <cstring>

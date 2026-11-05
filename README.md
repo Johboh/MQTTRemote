@@ -68,3 +68,6 @@ To use the bundeled certificates, make sure to build with the `CONFIG_MBEDTLS_CE
 You also need to configure the `MQTTRemote::Configuration` accordingly.
 
 Also see `MQTTRemote::Configuration::verification` for examples on how to configure for self-signed certificates and check out [TLS using LetsEncrypt example](examples/espidf/tls_letsencrypt/main/main.cpp)
+
+### License
+Licensed under the MIT License
